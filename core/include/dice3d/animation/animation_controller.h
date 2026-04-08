@@ -36,6 +36,9 @@ private:
     glm::quat _qRawEnd{1,0,0,0};
     glm::quat _qCorr{1,0,0,0};
 
+    glm::quat _orientationAtCorrectionStart{1,0,0,0};
+    bool _correctionStarted = false;
+
     std::mt19937 _rng;
 
     void initTumble();

@@ -16,6 +16,7 @@ void AnimationController::roll(const glm::quat& target, float duration) {
     _duration = std::max(duration, 0.001f);  // guard: zero duration
     _elapsed  = 0.0f;
     _state    = State::Spinning;
+    _correctionStarted = false;
     initTumble();
 }
 
@@ -61,14 +62,17 @@ void AnimationController::tick(float dt) {
         _orientation = glm::normalize(delta * _orientation);
     }
 
-    // Phase 2: blend in correction during final 30%
+    // Phase 2: blend correction in final 30% — slerp absolutely from snapshot to target
     if (t > kCorrectionStart) {
+        if (!_correctionStarted) {
+            _orientationAtCorrectionStart = _orientation;
+            _correctionStarted = true;
+        }
         float corrT = (t - kCorrectionStart) / (1.0f - kCorrectionStart);
         float blend = QuaternionUtils::easeInCubic(corrT);
-        glm::quat partialCorr = QuaternionUtils::slerp(
-            glm::quat(1,0,0,0), _qCorr, blend
+        _orientation = QuaternionUtils::slerp(
+            _orientationAtCorrectionStart, _target, blend
         );
-        _orientation = glm::normalize(_orientation * partialCorr);
     }
 
     if (t >= 1.0f) {
