@@ -16,7 +16,7 @@ GpuMesh MeshBuilder::build(const PolyMesh& mesh, int /*atlasSize*/) {
     for (auto& f : mesh.faces) if (f.faceNumber > 0) faceNums.insert(f.faceNumber);
     int N = (int)faceNums.size();
     int cols = N > 0 ? (int)std::ceil(std::sqrt((float)N)) : 1;
-    int rows = (N + cols - 1) / cols;
+    int rows = std::max((N + cols - 1) / cols, 1);  // guard: N=0 must not produce rows=0
     float cellW = 1.0f / (float)cols;
     float cellH = 1.0f / (float)rows;
     std::map<int, glm::vec4> faceCell;  // faceNumber -> (u0, v0, u1, v1)
