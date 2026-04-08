@@ -24,6 +24,7 @@
     CGSize s = self.bounds.size;
     uint32_t w = (uint32_t)(s.width  * self.contentScaleFactor);
     uint32_t h = (uint32_t)(s.height * self.contentScaleFactor);
+    layer.drawableSize = CGSizeMake(w, h);
     [_renderer attachLayer:layer width:w height:h];
 
     _lastTime = CACurrentMediaTime();
@@ -53,9 +54,17 @@
     // Update drawable size on bounds change
     if (_renderer) {
         CGSize s = self.bounds.size;
-        uint32_t w = (uint32_t)(s.width  * self.contentScaleFactor);
-        uint32_t h = (uint32_t)(s.height * self.contentScaleFactor);
-        ((CAMetalLayer*)self.layer).drawableSize = CGSizeMake(w, h);
+        CAMetalLayer* metalLayer = (CAMetalLayer*)self.layer;
+        UIScreen* screen = self.window ? self.window.screen : UIScreen.mainScreen;
+        CGFloat scale = metalLayer.contentsScale;
+        if (screen.bounds.size.width > 0.0) {
+            scale = screen.nativeBounds.size.width / screen.bounds.size.width;
+        }
+        if (scale < 1.0) scale = 1.0;
+        metalLayer.contentsScale = scale;
+        uint32_t w = (uint32_t)(s.width  * scale);
+        uint32_t h = (uint32_t)(s.height * scale);
+        metalLayer.drawableSize = CGSizeMake(w, h);
         [_renderer resize:w height:h];
     }
 }

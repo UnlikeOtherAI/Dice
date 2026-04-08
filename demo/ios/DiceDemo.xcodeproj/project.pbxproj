@@ -9,12 +9,14 @@
 /* Begin PBXBuildFile section */
 		1863D850D805438A647628BE /* DiceRenderer.mm in Sources */ = {isa = PBXBuildFile; fileRef = A3B2F30F32F97186D465DF37 /* DiceRenderer.mm */; };
 		4A0942BF478EC517F6BD27AC /* ContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2EFFB7B3DC86374786F23032 /* ContentView.swift */; };
+		8D820CACE74FE415E714330F /* dice.filamat in Resources */ = {isa = PBXBuildFile; fileRef = 11929CD91EC296EFAB7CC470 /* dice.filamat */; };
 		CD150CB05CE616099BE8E629 /* DiceView.mm in Sources */ = {isa = PBXBuildFile; fileRef = 75767D0F68FA7F070287965A /* DiceView.mm */; };
 		D55892ABB1071CED28173C8E /* DiceGameView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 21C7704102DFB84E86EF0F90 /* DiceGameView.swift */; };
 		DF2068795907692352637CBD /* DiceDemoApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1EFF319545152926F7CA74F6 /* DiceDemoApp.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
+		11929CD91EC296EFAB7CC470 /* dice.filamat */ = {isa = PBXFileReference; name = dice.filamat; path = ../../core/assets/dice.filamat; sourceTree = "<group>"; };
 		1EFF319545152926F7CA74F6 /* DiceDemoApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DiceDemoApp.swift; sourceTree = "<group>"; };
 		21C7704102DFB84E86EF0F90 /* DiceGameView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DiceGameView.swift; sourceTree = "<group>"; };
 		276B8907DAAB5201AAF5EAB5 /* DiceRenderer.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = DiceRenderer.h; sourceTree = "<group>"; };
@@ -33,6 +35,7 @@
 				BD9EB0DC0C7F11E699F6C697 /* DiceDemo */,
 				40341BB2948ECA2D53204D84 /* libdice3d-core */,
 				4C728BDDA575911C85719E75 /* Platform */,
+				C56BF75BDA4C43515F9F17E0 /* Resources */,
 				2665065A23839AD7F25459E4 /* Products */,
 			);
 			sourceTree = "<group>";
@@ -101,6 +104,14 @@
 			path = DiceDemo;
 			sourceTree = "<group>";
 		};
+		C56BF75BDA4C43515F9F17E0 /* Resources */ = {
+			isa = PBXGroup;
+			children = (
+				11929CD91EC296EFAB7CC470 /* dice.filamat */,
+			);
+			name = Resources;
+			sourceTree = "<group>";
+		};
 /* End PBXGroup section */
 
 /* Begin PBXNativeTarget section */
@@ -109,6 +120,7 @@
 			buildConfigurationList = FFAAC4E7EBA14D4DC0AE4C89 /* Build configuration list for PBXNativeTarget "DiceDemo" */;
 			buildPhases = (
 				615F75A62D01D8556D393735 /* Sources */,
+				B213E557C3E2BB3A02040CCA /* Resources */,
 			);
 			buildRules = (
 			);
@@ -154,6 +166,17 @@
 			);
 		};
 /* End PBXProject section */
+
+/* Begin PBXResourcesBuildPhase section */
+		B213E557C3E2BB3A02040CCA /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				8D820CACE74FE415E714330F /* dice.filamat in Resources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXResourcesBuildPhase section */
 
 /* Begin PBXSourcesBuildPhase section */
 		615F75A62D01D8556D393735 /* Sources */ = {
@@ -216,7 +239,7 @@
 				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
 				GCC_WARN_UNUSED_FUNCTION = YES;
 				GCC_WARN_UNUSED_VARIABLE = YES;
-				IPHONEOS_DEPLOYMENT_TARGET = 15.0;
+				IPHONEOS_DEPLOYMENT_TARGET = 16.0;
 				MTL_ENABLE_DEBUG_INFO = NO;
 				MTL_FAST_MATH = YES;
 				PRODUCT_NAME = "$(TARGET_NAME)";
@@ -255,6 +278,10 @@
 				LIBRARY_SEARCH_PATHS = (
 					"$(PROJECT_DIR)/../../build-ios-device/core",
 					"/tmp/filament-ios/filament/lib/universal",
+				);
+				"LIBRARY_SEARCH_PATHS[sdk=iphonesimulator*]" = (
+					"$(PROJECT_DIR)/../../build-ios-sim-arm64/core",
+					"/tmp/filament-ios-sim",
 				);
 				OTHER_LDFLAGS = (
 					"-ldice3d",
@@ -305,6 +332,10 @@
 				LIBRARY_SEARCH_PATHS = (
 					"$(PROJECT_DIR)/../../build-ios-device/core",
 					"/tmp/filament-ios/filament/lib/universal",
+				);
+				"LIBRARY_SEARCH_PATHS[sdk=iphonesimulator*]" = (
+					"$(PROJECT_DIR)/../../build-ios-sim-arm64/core",
+					"/tmp/filament-ios-sim",
 				);
 				OTHER_LDFLAGS = (
 					"-ldice3d",
@@ -378,7 +409,7 @@
 				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
 				GCC_WARN_UNUSED_FUNCTION = YES;
 				GCC_WARN_UNUSED_VARIABLE = YES;
-				IPHONEOS_DEPLOYMENT_TARGET = 15.0;
+				IPHONEOS_DEPLOYMENT_TARGET = 16.0;
 				MTL_ENABLE_DEBUG_INFO = INCLUDE_SOURCE;
 				MTL_FAST_MATH = YES;
 				ONLY_ACTIVE_ARCH = YES;

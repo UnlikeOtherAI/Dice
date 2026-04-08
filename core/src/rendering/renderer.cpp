@@ -108,11 +108,10 @@ void Renderer::resize(uint32_t w, uint32_t h) {
 
 void Renderer::setupCamera(uint32_t w, uint32_t h) {
     float aspect = (h > 0) ? (float)w / (float)h : 1.0f;
-    // Vertical FOV 45°. On portrait phones (aspect ~0.46) the visible half-width
-    // = aspect * distance * tan(22.5°). Die fits in ±2 units, so we need
-    // distance ≥ 2 / (aspect * tan(22.5°)) ≈ 10.5 for portrait — use 12 for margin.
+    // Pull the camera farther back to avoid near-plane clipping when the
+    // simulator uses the full native drawable size.
     _camera->setProjection(45.0, aspect, 0.1, 200.0);
-    _camera->lookAt({0,0,12}, {0,0,0}, {0,1,0});
+    _camera->lookAt({0,0,15}, {0,0,0}, {0,1,0});
 }
 
 void Renderer::setupLighting() {
@@ -151,10 +150,14 @@ uint32_t Renderer::addDie(const GpuMesh& mesh, const glm::vec4& dieColor, bool w
     die.vb = vbBuilder.build(*_engine);
 
     // Upload positions
-    die.vb->setBufferAt(*_engine, 0,
-        filament::VertexBuffer::BufferDescriptor(
-            mesh.positions.data(),
-            mesh.positions.size() * sizeof(glm::vec3)));
+    auto* ownedPositions = new std::vector<glm::vec3>(mesh.positions);
+    die.vb->setBufferAt(*_engine, 0, filament::VertexBuffer::BufferDescriptor(
+        ownedPositions->data(),
+        ownedPositions->size() * sizeof(glm::vec3),
+        [](void* /*buf*/, size_t, void* user) {
+            delete static_cast<std::vector<glm::vec3>*>(user);
+        },
+        ownedPositions));
 
     // Convert tangent quaternions to HALF4 and upload
     std::vector<uint16_t> half4tangents;
@@ -184,14 +187,16 @@ uint32_t Renderer::addDie(const GpuMesh& mesh, const glm::vec4& dieColor, bool w
         ownedTangents));
 
     // Upload UVs
-    die.vb->setBufferAt(*_engine, 2,
-        filament::VertexBuffer::BufferDescriptor(
-            mesh.uvs.data(),
-            mesh.uvs.size() * sizeof(glm::vec2)));
+    auto* ownedUvs = new std::vector<glm::vec2>(mesh.uvs);
+    die.vb->setBufferAt(*_engine, 2, filament::VertexBuffer::BufferDescriptor(
+        ownedUvs->data(),
+        ownedUvs->size() * sizeof(glm::vec2),
+        [](void* /*buf*/, size_t, void* user) {
+            delete static_cast<std::vector<glm::vec2>*>(user);
+        },
+        ownedUvs));
 
     // Upload per-vertex color (die color for all verts)
-    // NOTE: mesh.positions, mesh.uvs, mesh.indices are caller-owned (const-ref) — the GpuMesh
-    // must outlive the GPU upload (caller contract). These buffers are NOT heap-copied here.
     auto* ownedColors = new std::vector<glm::vec3>(
         mesh.positions.size(), glm::vec3(dieColor.r, dieColor.g, dieColor.b));
     die.vb->setBufferAt(*_engine, 3, filament::VertexBuffer::BufferDescriptor(
@@ -207,10 +212,14 @@ uint32_t Renderer::addDie(const GpuMesh& mesh, const glm::vec4& dieColor, bool w
         .indexCount((uint32_t)mesh.indices.size())
         .bufferType(filament::IndexBuffer::IndexType::UINT)
         .build(*_engine);
-    die.ib->setBuffer(*_engine,
-        filament::IndexBuffer::BufferDescriptor(
-            mesh.indices.data(),
-            mesh.indices.size() * sizeof(uint32_t)));
+    auto* ownedIndices = new std::vector<uint32_t>(mesh.indices);
+    die.ib->setBuffer(*_engine, filament::IndexBuffer::BufferDescriptor(
+        ownedIndices->data(),
+        ownedIndices->size() * sizeof(uint32_t),
+        [](void* /*buf*/, size_t, void* user) {
+            delete static_cast<std::vector<uint32_t>*>(user);
+        },
+        ownedIndices));
 
     // --- Entity + renderable ---
     die.entity = utils::EntityManager::get().create();

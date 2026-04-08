@@ -1,7 +1,7 @@
 name: DiceDemo
 options:
   deploymentTarget:
-    iOS: "15.0"
+    iOS: "16.0"
   bundleIdPrefix: com.kilomayo
   xcodeVersion: "15"
   createIntermediateGroups: true
@@ -53,3 +53,12 @@ targets:
         INFOPLIST_KEY_UISupportedInterfaceOrientations_iPhone: "UIInterfaceOrientationPortrait"
         CODE_SIGN_STYLE: Automatic
         DEVELOPMENT_TEAM: 59S95D279D
+      configs:
+        Debug:
+          LIBRARY_SEARCH_PATHS[sdk=iphonesimulator*]:
+            - "$(PROJECT_DIR)/../../build-ios-sim-arm64/core"
+            - "/tmp/filament-ios-sim"
+        Release:
+          LIBRARY_SEARCH_PATHS[sdk=iphonesimulator*]:
+            - "$(PROJECT_DIR)/../../build-ios-sim-arm64/core"
+            - "/tmp/filament-ios-sim"

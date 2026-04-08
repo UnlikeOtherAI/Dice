@@ -49,3 +49,20 @@ TEST_CASE("chamfer preserves face numbers on original faces") {
     }
     REQUIRE(namedFaces == 6);
 }
+
+TEST_CASE("chamfered d16 fan triangulation stays consistent with face winding") {
+    auto base = Polyhedra::generate(16);
+    auto result = Chamfer::apply(base, 0.05f);
+
+    for (auto& f : result.faces) {
+        if (f.indices.size() < 4) continue;
+
+        glm::vec3 a = result.vertices[f.indices[0]];
+        for (size_t k = 1; k + 1 < f.indices.size(); k++) {
+            glm::vec3 b = result.vertices[f.indices[k]];
+            glm::vec3 c = result.vertices[f.indices[k + 1]];
+            glm::vec3 geom_normal = glm::normalize(glm::cross(b - a, c - a));
+            REQUIRE(glm::dot(geom_normal, f.normal) > 0.0f);
+        }
+    }
+}

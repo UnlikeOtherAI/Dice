@@ -3,14 +3,13 @@ import SwiftUI
 private let dieTypes = [4, 6, 8, 10, 12, 16, 20, 32]
 
 struct ContentView: View {
-    @State private var selectedSides = 20
+    @State private var selectedSides = 16
     @State private var hue: Double = 0.6        // starts blue-ish
-    @State private var rollTrigger = 0
+    @State private var rollTrigger = 1
 
     var body: some View {
         ZStack {
-            // Subtle dark background so the transparent die pops
-            Color.black.ignoresSafeArea()
+            Color.white.ignoresSafeArea()
 
             VStack(spacing: 0) {
                 // Die view — tapping rolls it

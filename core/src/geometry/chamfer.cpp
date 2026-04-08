@@ -88,15 +88,24 @@ PolyMesh Chamfer::apply(const PolyMesh& input, float bevel_factor) {
 
         glm::vec3 center = input.vertices[origVert];
         glm::vec3 normal = glm::normalize(center);  // outward: assumes origin-centered mesh
-        glm::vec3 ref = glm::normalize(result.vertices[insetVerts[0]] - center);
+        auto projectToCapPlane = [&](const glm::vec3& v) {
+            return v - normal * glm::dot(v, normal);
+        };
+
+        glm::vec3 ref = projectToCapPlane(result.vertices[insetVerts[0]] - center);
+        if (glm::length(ref) < 1e-6f) {
+            glm::vec3 arb = std::abs(normal.x) < 0.9f ? glm::vec3(1, 0, 0) : glm::vec3(0, 1, 0);
+            ref = arb - normal * glm::dot(arb, normal);
+        }
+        ref = glm::normalize(ref);
+        glm::vec3 tangent = glm::normalize(glm::cross(normal, ref));
 
         std::vector<std::pair<float, int>> angleIdx;
         for (int iv : insetVerts) {
-            glm::vec3 d = glm::normalize(result.vertices[iv] - center);
-            float angle = std::atan2(
-                glm::dot(glm::cross(ref, d), normal),
-                glm::dot(ref, d)
-            );
+            glm::vec3 d = projectToCapPlane(result.vertices[iv] - center);
+            float dLen = glm::length(d);
+            if (dLen > 1e-6f) d /= dLen;
+            float angle = std::atan2(glm::dot(d, tangent), glm::dot(d, ref));
             angleIdx.push_back({angle, iv});
         }
         std::sort(angleIdx.begin(), angleIdx.end());
