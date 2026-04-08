@@ -31,10 +31,26 @@ Renderer::Renderer(filament::Engine::Backend backend) {
 }
 
 void Renderer::loadMaterial(const void* data, size_t size) {
+    // Null existing matInst pointers before destroying — instances are owned by the material.
+    for (auto& [h, die] : _dice) { die.matInst = nullptr; }
     if (_material) _engine->destroy(_material);
     _material = filament::Material::Builder()
         .package(data, size)
         .build(*_engine);
+}
+
+void Renderer::loadAtlasTexture(const void* rgbaData, uint32_t width, uint32_t height) {
+    if (_atlasTexture) _engine->destroy(_atlasTexture);
+    _atlasTexture = filament::Texture::Builder()
+        .width(width).height(height).levels(1)
+        .sampler(filament::Texture::Sampler::SAMPLER_2D)
+        .format(filament::Texture::InternalFormat::RGBA8)
+        .build(*_engine);
+    filament::Texture::PixelBufferDescriptor buf(
+        rgbaData, width * height * 4,
+        filament::Texture::Format::RGBA,
+        filament::Texture::Type::UBYTE);
+    _atlasTexture->setImage(*_engine, 0, std::move(buf));
 }
 
 Renderer::~Renderer() {
@@ -49,7 +65,8 @@ Renderer::~Renderer() {
         utils::EntityManager::get().destroy(_sunLight);
     }
 
-    // Destroy material
+    // Destroy material and atlas texture
+    if (_atlasTexture) _engine->destroy(_atlasTexture);
     if (_material) _engine->destroy(_material);
 
     // Destroy camera / view / scene
@@ -108,7 +125,7 @@ void Renderer::setupLighting() {
     _scene->addEntity(_sunLight);
 }
 
-uint32_t Renderer::addDie(const GpuMesh& mesh, const glm::vec4& dieColor, bool /*whiteNumbers*/) {
+uint32_t Renderer::addDie(const GpuMesh& mesh, const glm::vec4& dieColor, bool whiteNumbers) {
     uint32_t handle = _nextHandle++;
 
     DieInstance die;
@@ -195,8 +212,8 @@ uint32_t Renderer::addDie(const GpuMesh& mesh, const glm::vec4& dieColor, bool /
     // --- Entity + renderable ---
     die.entity = utils::EntityManager::get().create();
 
-    // Bind material instance if a material has been loaded via loadMaterial().
-    if (_material) {
+    // Bind material instance if both material and atlas texture have been loaded.
+    if (_material && _atlasTexture) {
         die.matInst = _material->createInstance();
         die.matInst->setParameter("dieColor",
             filament::math::float4{dieColor.r, dieColor.g, dieColor.b, dieColor.a});
@@ -204,6 +221,9 @@ uint32_t Renderer::addDie(const GpuMesh& mesh, const glm::vec4& dieColor, bool /
             whiteNumbers
                 ? filament::math::float4{1,1,1,1}
                 : filament::math::float4{0,0,0,1});
+        filament::TextureSampler sampler(filament::TextureSampler::MinFilter::LINEAR,
+                                        filament::TextureSampler::MagFilter::LINEAR);
+        die.matInst->setParameter("numberAtlas", _atlasTexture, sampler);
     }
 
     auto rb = filament::RenderableManager::Builder(1)

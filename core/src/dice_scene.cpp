@@ -18,6 +18,10 @@ void DiceScene::loadMaterial(const void* data, size_t size) {
     _renderer->loadMaterial(data, size);
 }
 
+void DiceScene::loadAtlas(const void* rgbaData, uint32_t width, uint32_t height) {
+    _renderer->loadAtlasTexture(rgbaData, width, height);
+}
+
 void DiceScene::attachSurface(void* nativeWindow, uint32_t w, uint32_t h) {
     _renderer->attachSurface(nativeWindow, w, h);
 }

@@ -68,4 +68,9 @@ void dice3d_load_material(Dice3DSceneRef scene, const void* data, size_t size) {
     toScene(scene)->loadMaterial(data, size);
 }
 
+void dice3d_load_atlas(Dice3DSceneRef scene, const void* rgbaData,
+                       uint32_t width, uint32_t height) {
+    toScene(scene)->loadAtlas(rgbaData, width, height);
+}
+
 } // extern "C"

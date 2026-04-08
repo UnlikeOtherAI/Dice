@@ -29,6 +29,8 @@ public:
     void resize(uint32_t w, uint32_t h);
 
     void loadMaterial(const void* filamatData, size_t size);
+    // rgbaData = raw RGBA8 pixels decoded from the die-type atlas PNG.
+    void loadAtlas(const void* rgbaData, uint32_t width, uint32_t height);
 
     // NOTE: Synchronous mesh build. Avoid calling on the main thread for d32.
     uint32_t addDie(const DieConfig& config);

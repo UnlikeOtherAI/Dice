@@ -19,6 +19,8 @@
 #include <filament/IndexBuffer.h>
 #include <filament/Material.h>
 #include <filament/MaterialInstance.h>
+#include <filament/Texture.h>
+#include <filament/TextureSampler.h>
 #include <filament/LightManager.h>
 #include <unordered_map>
 #endif
@@ -45,8 +47,10 @@ public:
     void detachSurface();
     void resize(uint32_t width, uint32_t height);
 
-    // Call once after construction, before addDie. filamatData is the compiled .filamat binary.
+    // Call before addDie. filamatData = compiled .filamat binary.
     void loadMaterial(const void* filamatData, size_t size);
+    // Call before addDie. rgbaData = raw RGBA8 pixels (width*height*4 bytes).
+    void loadAtlasTexture(const void* rgbaData, uint32_t width, uint32_t height);
 
     uint32_t addDie(const GpuMesh& mesh, const glm::vec4& dieColor, bool whiteNumbers);
     void removeDie(uint32_t handle);
@@ -64,7 +68,8 @@ private:
     filament::Scene*     _scene     = nullptr;
     filament::Camera*    _camera    = nullptr;
     utils::Entity        _cameraEntity;
-    filament::Material*  _material  = nullptr;
+    filament::Material*  _material      = nullptr;
+    filament::Texture*   _atlasTexture  = nullptr;
     utils::Entity        _sunLight;
 
     std::unordered_map<uint32_t, DieInstance> _dice;
@@ -82,6 +87,7 @@ public:
     explicit Renderer(int backend = 0) {}
     ~Renderer() = default;
     void loadMaterial(const void*, size_t) {}
+    void loadAtlasTexture(const void*, uint32_t, uint32_t) {}
     void attachSurface(void*, uint32_t, uint32_t) {}
     void detachSurface() {}
     void resize(uint32_t, uint32_t) {}

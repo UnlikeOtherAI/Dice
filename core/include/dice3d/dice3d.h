@@ -34,6 +34,9 @@ void dice3d_render_frame(Dice3DSceneRef scene);
 // Optional: call before addDie to enable PBR number rendering.
 // data = compiled .filamat binary, size = byte length.
 void dice3d_load_material(Dice3DSceneRef scene, const void* data, size_t size);
+// Load the atlas texture for the current die type (raw RGBA8 pixels, width*height*4 bytes).
+// Call after dice3d_load_material, before dice3d_add_die, once per die type.
+void dice3d_load_atlas(Dice3DSceneRef scene, const void* rgbaData, uint32_t width, uint32_t height);
 
 #ifdef __cplusplus
 }
