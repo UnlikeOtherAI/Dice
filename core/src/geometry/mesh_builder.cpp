@@ -10,6 +10,7 @@ using namespace dice3d;
 
 GpuMesh MeshBuilder::build(const PolyMesh& mesh, int /*atlasSize*/) {
     GpuMesh result;
+    static constexpr float kCellPadding = 0.18f;
 
     // --- UV atlas layout ---
     std::set<int> faceNums;
@@ -56,22 +57,22 @@ GpuMesh MeshBuilder::build(const PolyMesh& mesh, int /*atlasSize*/) {
 
         // Project face verts onto local 2D plane to compute UVs
         std::vector<glm::vec2> localCoords(vertCount);
-        float minU = 1e9f, maxU = -1e9f, minV = 1e9f, maxV = -1e9f;
+        float maxAbsU = 0.0f;
+        float maxAbsV = 0.0f;
         for (int k = 0; k < vertCount; k++) {
             glm::vec3 d = mesh.vertices[face.indices[k]] - centroid;
             localCoords[k] = {glm::dot(d, right), glm::dot(d, up)};
-            minU = std::min(minU, localCoords[k].x);
-            maxU = std::max(maxU, localCoords[k].x);
-            minV = std::min(minV, localCoords[k].y);
-            maxV = std::max(maxV, localCoords[k].y);
+            maxAbsU = std::max(maxAbsU, std::abs(localCoords[k].x));
+            maxAbsV = std::max(maxAbsV, std::abs(localCoords[k].y));
         }
-        float rangeU = std::max(maxU - minU, 1e-6f);
-        float rangeV = std::max(maxV - minV, 1e-6f);
+        float halfExtent = std::max(std::max(maxAbsU, maxAbsV), 1e-6f);
 
-        // Get atlas cell for this face (bevel/cap faces use a corner sliver)
-        glm::vec4 cell = {0.0f, 0.0f, cellW, cellH};  // default for bevel faces
-        if (face.faceNumber > 0 && faceCell.count(face.faceNumber))
-            cell = faceCell[face.faceNumber];
+        bool hasNumberCell = face.faceNumber > 0 && faceCell.count(face.faceNumber);
+        glm::vec4 cell = hasNumberCell ? faceCell[face.faceNumber] : glm::vec4(0.0f);
+        float insetU0 = cell.x + cellW * kCellPadding;
+        float insetV0 = cell.y + cellH * kCellPadding;
+        float insetU1 = cell.z - cellW * kCellPadding;
+        float insetV1 = cell.w - cellH * kCellPadding;
 
         // Tangent quaternion (same for all verts on this face)
         // Columns: T=right, B=up, N=normal
@@ -86,11 +87,20 @@ GpuMesh MeshBuilder::build(const PolyMesh& mesh, int /*atlasSize*/) {
             result.positions.push_back(mesh.vertices[face.indices[k]]);
             result.normals.push_back(normal);
             result.tangents.push_back(tangentQ);
-            // UV: normalize local coord to [0,1] then map into atlas cell
-            float u = (localCoords[k].x - minU) / rangeU;
-            float v = (localCoords[k].y - minV) / rangeV;
-            float au = cell.x + u * (cell.z - cell.x);
-            float av = cell.y + v * (cell.w - cell.y);
+            // Keep the label centered and preserve aspect ratio instead of
+            // stretching it to each face's full bounding box.
+            float au;
+            float av;
+            if (hasNumberCell) {
+                float u = 0.5f - (localCoords[k].x / (2.0f * halfExtent));
+                float v = 0.5f + (localCoords[k].y / (2.0f * halfExtent));
+                au = insetU0 + u * (insetU1 - insetU0);
+                av = insetV0 + v * (insetV1 - insetV0);
+            } else {
+                // Non-number faces should always sample transparent atlas space.
+                au = 0.0f;
+                av = 0.0f;
+            }
             result.uvs.push_back({au, av});
         }
 

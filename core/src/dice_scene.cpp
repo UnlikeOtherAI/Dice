@@ -34,6 +34,10 @@ void DiceScene::resize(uint32_t w, uint32_t h) {
     _renderer->resize(w, h);
 }
 
+void DiceScene::setCameraDistance(float distance) {
+    _renderer->setCameraDistance(distance);
+}
+
 uint32_t DiceScene::addDie(const DieConfig& config) {
     // Build mesh: generate → chamfer → mesh_builder
     auto poly = Polyhedra::generate(config.sides);
@@ -50,8 +54,23 @@ uint32_t DiceScene::addDie(const DieConfig& config) {
         renderHandle,
         std::make_unique<AnimationController>(),
         std::move(faceMap),
-        glm::vec3(0, 0, 0)
+        glm::vec3(0, 0, 0),
+        config.presentationMode,
+        config.idleSpinSpeed,
+        config.presentationSpinSpeed,
+        config.presentationDuration,
+        config.dragSensitivity
     };
+    switch (config.presentationMode) {
+    case PresentationMode::SpinIn:
+        _dice[handle].anim->startPresentationSpin(config.presentationSpinSpeed, config.presentationDuration);
+        break;
+    case PresentationMode::IdleSpin:
+        _dice[handle].anim->startIdleSpin(config.idleSpinSpeed);
+        break;
+    case PresentationMode::Static:
+        break;
+    }
 
     layoutDice();
     return handle;
@@ -71,6 +90,58 @@ void DiceScene::roll(uint32_t handle, int result, float duration) {
     auto& die = it->second;
     glm::quat target = die.faceMap->orientationForFace(result);
     die.anim->roll(target, duration);
+}
+
+void DiceScene::setPresentationMode(uint32_t handle, PresentationMode mode, float speed, float duration) {
+    auto it = _dice.find(handle);
+    if (it == _dice.end()) return;
+    auto& die = it->second;
+    die.presentationMode = mode;
+    die.idleSpinSpeed = speed;
+    die.presentationSpinSpeed = speed;
+    die.presentationDuration = duration;
+    switch (mode) {
+    case PresentationMode::Static:
+        die.anim->stopIdleSpin();
+        break;
+    case PresentationMode::SpinIn:
+        die.anim->startPresentationSpin(speed, duration);
+        break;
+    case PresentationMode::IdleSpin:
+        die.anim->startIdleSpin(speed);
+        break;
+    }
+}
+
+void DiceScene::setIdleSpinSpeed(uint32_t handle, float speed) {
+    auto it = _dice.find(handle);
+    if (it == _dice.end()) return;
+    it->second.idleSpinSpeed = speed;
+    if (it->second.presentationMode == PresentationMode::IdleSpin) {
+        it->second.anim->startIdleSpin(speed);
+    }
+}
+
+void DiceScene::beginDrag(uint32_t handle) {
+    auto it = _dice.find(handle);
+    if (it == _dice.end()) return;
+    it->second.anim->beginDrag();
+}
+
+void DiceScene::dragBy(uint32_t handle, float deltaX, float deltaY) {
+    auto it = _dice.find(handle);
+    if (it == _dice.end()) return;
+    const float s = it->second.dragSensitivity;
+    it->second.anim->dragBy(deltaX * s, deltaY * s);
+}
+
+void DiceScene::endDrag(uint32_t handle) {
+    auto it = _dice.find(handle);
+    if (it == _dice.end()) return;
+    it->second.anim->endDrag();
+    if (it->second.presentationMode == PresentationMode::IdleSpin) {
+        it->second.anim->startIdleSpin(it->second.idleSpinSpeed);
+    }
 }
 
 void DiceScene::tick(float dt) {

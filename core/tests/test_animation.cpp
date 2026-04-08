@@ -34,11 +34,39 @@ TEST_CASE("animation starts in idle state") {
     REQUIRE(ctrl.state() == AnimationController::State::Idle);
 }
 
+TEST_CASE("idle spin changes orientation over time") {
+    AnimationController ctrl;
+    auto initial = ctrl.currentOrientation();
+    ctrl.startIdleSpin();
+    REQUIRE(ctrl.state() == AnimationController::State::IdleSpinning);
+    ctrl.tick(0.5f);
+    auto spun = ctrl.currentOrientation();
+    REQUIRE(std::abs(glm::dot(initial, spun)) < 0.999f);
+}
+
+TEST_CASE("presentation spin settles after its duration") {
+    AnimationController ctrl;
+    ctrl.startPresentationSpin(3.0f, 0.2f);
+    REQUIRE(ctrl.state() == AnimationController::State::IdleSpinning);
+    ctrl.tick(0.25f);
+    REQUIRE(ctrl.state() == AnimationController::State::Settled);
+}
+
 TEST_CASE("after roll(), state is Spinning") {
     AnimationController ctrl;
+    ctrl.startIdleSpin();
     glm::quat target(1,0,0,0);
     ctrl.roll(target, 2.0f);
     REQUIRE(ctrl.state() == AnimationController::State::Spinning);
+}
+
+TEST_CASE("drag changes orientation immediately") {
+    AnimationController ctrl;
+    auto initial = ctrl.currentOrientation();
+    ctrl.beginDrag();
+    ctrl.dragBy(0.2f, 0.1f);
+    auto dragged = ctrl.currentOrientation();
+    REQUIRE(std::abs(glm::dot(initial, dragged)) < 0.999f);
 }
 
 TEST_CASE("after full duration, state is Settled") {

@@ -7,37 +7,67 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
-		1863D850D805438A647628BE /* DiceRenderer.mm in Sources */ = {isa = PBXBuildFile; fileRef = A3B2F30F32F97186D465DF37 /* DiceRenderer.mm */; };
+		1F9DC9FD67CAEF6D4B42541A /* DiceView.mm in Sources */ = {isa = PBXBuildFile; fileRef = 8B81A6CEC38835655BB0FF66 /* DiceView.mm */; };
+		2DFD267843027693041C9CA6 /* d8.png in Resources */ = {isa = PBXBuildFile; fileRef = 7A149457853A567146973162 /* d8.png */; };
+		4669217E64921EA12ADD649E /* d16.png in Resources */ = {isa = PBXBuildFile; fileRef = E12276F1FCD470202FF5031C /* d16.png */; };
 		4A0942BF478EC517F6BD27AC /* ContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2EFFB7B3DC86374786F23032 /* ContentView.swift */; };
+		55F6A83D57E705E38FFB57EA /* d12.png in Resources */ = {isa = PBXBuildFile; fileRef = 1F1EAB8B6E265C8F3DBFE7A1 /* d12.png */; };
+		5773A71F76C0F723491D72A5 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 47CE796755ABFCB559F9CB98 /* Assets.xcassets */; };
+		8C72C3768B30EC9DF10809A2 /* d6.png in Resources */ = {isa = PBXBuildFile; fileRef = E8320C4B67FFD5B5C8469F5A /* d6.png */; };
 		8D820CACE74FE415E714330F /* dice.filamat in Resources */ = {isa = PBXBuildFile; fileRef = 11929CD91EC296EFAB7CC470 /* dice.filamat */; };
-		CD150CB05CE616099BE8E629 /* DiceView.mm in Sources */ = {isa = PBXBuildFile; fileRef = 75767D0F68FA7F070287965A /* DiceView.mm */; };
+		B1C0F6965E3E8046F80DA15D /* d20.png in Resources */ = {isa = PBXBuildFile; fileRef = 6D40B0D423291B727D4AE6E6 /* d20.png */; };
+		CFC9EA5A6FB1AF8BA69C126A /* DiceRenderer.mm in Sources */ = {isa = PBXBuildFile; fileRef = 591F3AD230C0B95D04FD1FE3 /* DiceRenderer.mm */; };
 		D55892ABB1071CED28173C8E /* DiceGameView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 21C7704102DFB84E86EF0F90 /* DiceGameView.swift */; };
+		D6B06F2871B917DF1A226706 /* d10.png in Resources */ = {isa = PBXBuildFile; fileRef = 4D882CDE4CAE076720021B43 /* d10.png */; };
 		DF2068795907692352637CBD /* DiceDemoApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1EFF319545152926F7CA74F6 /* DiceDemoApp.swift */; };
+		EDD70930C80551864F3AD825 /* d4.png in Resources */ = {isa = PBXBuildFile; fileRef = 3ED30DDDB98A77703DE8A414 /* d4.png */; };
+		FD242DF2C98A3D18D8F13E80 /* d32.png in Resources */ = {isa = PBXBuildFile; fileRef = D667D21ABC77FD3F3F860936 /* d32.png */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
+		0BE845013719DF836FF31774 /* DiceRenderer.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = DiceRenderer.h; sourceTree = "<group>"; };
 		11929CD91EC296EFAB7CC470 /* dice.filamat */ = {isa = PBXFileReference; name = dice.filamat; path = ../../core/assets/dice.filamat; sourceTree = "<group>"; };
 		1EFF319545152926F7CA74F6 /* DiceDemoApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DiceDemoApp.swift; sourceTree = "<group>"; };
+		1F1EAB8B6E265C8F3DBFE7A1 /* d12.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = d12.png; sourceTree = "<group>"; };
 		21C7704102DFB84E86EF0F90 /* DiceGameView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DiceGameView.swift; sourceTree = "<group>"; };
-		276B8907DAAB5201AAF5EAB5 /* DiceRenderer.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = DiceRenderer.h; sourceTree = "<group>"; };
 		2EFFB7B3DC86374786F23032 /* ContentView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContentView.swift; sourceTree = "<group>"; };
+		3ED30DDDB98A77703DE8A414 /* d4.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = d4.png; sourceTree = "<group>"; };
+		47CE796755ABFCB559F9CB98 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
+		4D882CDE4CAE076720021B43 /* d10.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = d10.png; sourceTree = "<group>"; };
 		572EDD0C3B537F6F3ED42DE6 /* DiceDemo.app */ = {isa = PBXFileReference; includeInIndex = 0; lastKnownFileType = wrapper.application; path = DiceDemo.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		591F3AD230C0B95D04FD1FE3 /* DiceRenderer.mm */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.objcpp; path = DiceRenderer.mm; sourceTree = "<group>"; };
 		5BB09385320240B9B2D6A6EA /* DiceDemo-Bridging-Header.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = "DiceDemo-Bridging-Header.h"; sourceTree = "<group>"; };
-		75767D0F68FA7F070287965A /* DiceView.mm */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.objcpp; path = DiceView.mm; sourceTree = "<group>"; };
-		92DB05C0489CD92AE6FF4EA6 /* DiceView.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = DiceView.h; sourceTree = "<group>"; };
-		A3B2F30F32F97186D465DF37 /* DiceRenderer.mm */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.objcpp; path = DiceRenderer.mm; sourceTree = "<group>"; };
+		6D40B0D423291B727D4AE6E6 /* d20.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = d20.png; sourceTree = "<group>"; };
+		7A149457853A567146973162 /* d8.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = d8.png; sourceTree = "<group>"; };
+		8B81A6CEC38835655BB0FF66 /* DiceView.mm */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.objcpp; path = DiceView.mm; sourceTree = "<group>"; };
+		B604DB5269C9D4E2D3753D94 /* DiceView.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = DiceView.h; sourceTree = "<group>"; };
+		D667D21ABC77FD3F3F860936 /* d32.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = d32.png; sourceTree = "<group>"; };
+		E12276F1FCD470202FF5031C /* d16.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = d16.png; sourceTree = "<group>"; };
+		E8320C4B67FFD5B5C8469F5A /* d6.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = d6.png; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXGroup section */
 		0FA89DEE58FF84FF0BD2A66A = {
 			isa = PBXGroup;
 			children = (
+				45B08CB3C11D674BEEFA4BD2 /* dice */,
 				BD9EB0DC0C7F11E699F6C697 /* DiceDemo */,
-				40341BB2948ECA2D53204D84 /* libdice3d-core */,
 				4C728BDDA575911C85719E75 /* Platform */,
 				C56BF75BDA4C43515F9F17E0 /* Resources */,
 				2665065A23839AD7F25459E4 /* Products */,
 			);
+			sourceTree = "<group>";
+		};
+		1A661AC3BAB935DB89FC9E66 /* ios */ = {
+			isa = PBXGroup;
+			children = (
+				0BE845013719DF836FF31774 /* DiceRenderer.h */,
+				591F3AD230C0B95D04FD1FE3 /* DiceRenderer.mm */,
+				B604DB5269C9D4E2D3753D94 /* DiceView.h */,
+				8B81A6CEC38835655BB0FF66 /* DiceView.mm */,
+			);
+			name = ios;
+			path = ../../platform/ios;
 			sourceTree = "<group>";
 		};
 		2665065A23839AD7F25459E4 /* Products */ = {
@@ -48,12 +78,37 @@
 			name = Products;
 			sourceTree = "<group>";
 		};
-		40341BB2948ECA2D53204D84 /* libdice3d-core */ = {
+		2A9BCAD16911D36AD2024D2A /* core */ = {
 			isa = PBXGroup;
 			children = (
-				588DA502E096ED656FEF277C /* platform */,
+				FE0099FA3DAD5201BB82CA7E /* assets */,
 			);
-			name = "libdice3d-core";
+			path = core;
+			sourceTree = "<group>";
+		};
+		35A1250A9A7B7DE62EE2F80A /* atlas */ = {
+			isa = PBXGroup;
+			children = (
+				3ED30DDDB98A77703DE8A414 /* d4.png */,
+				E8320C4B67FFD5B5C8469F5A /* d6.png */,
+				7A149457853A567146973162 /* d8.png */,
+				4D882CDE4CAE076720021B43 /* d10.png */,
+				1F1EAB8B6E265C8F3DBFE7A1 /* d12.png */,
+				E12276F1FCD470202FF5031C /* d16.png */,
+				6D40B0D423291B727D4AE6E6 /* d20.png */,
+				D667D21ABC77FD3F3F860936 /* d32.png */,
+			);
+			name = atlas;
+			path = ../../core/assets/atlas;
+			sourceTree = "<group>";
+		};
+		45B08CB3C11D674BEEFA4BD2 /* dice */ = {
+			isa = PBXGroup;
+			children = (
+				2A9BCAD16911D36AD2024D2A /* core */,
+				6EFBC78C7CB5F613626CF521 /* platform */,
+			);
+			name = dice;
 			path = ../..;
 			sourceTree = "<group>";
 		};
@@ -65,30 +120,18 @@
 			name = Platform;
 			sourceTree = "<group>";
 		};
-		588DA502E096ED656FEF277C /* platform */ = {
+		6EFBC78C7CB5F613626CF521 /* platform */ = {
 			isa = PBXGroup;
 			children = (
-				9FA94713C9C1182C79A5221D /* ios */,
+				1A661AC3BAB935DB89FC9E66 /* ios */,
 			);
 			path = platform;
-			sourceTree = "<group>";
-		};
-		9FA94713C9C1182C79A5221D /* ios */ = {
-			isa = PBXGroup;
-			children = (
-				276B8907DAAB5201AAF5EAB5 /* DiceRenderer.h */,
-				A3B2F30F32F97186D465DF37 /* DiceRenderer.mm */,
-				92DB05C0489CD92AE6FF4EA6 /* DiceView.h */,
-				75767D0F68FA7F070287965A /* DiceView.mm */,
-			);
-			name = ios;
-			path = ../../platform/ios;
 			sourceTree = "<group>";
 		};
 		B4A0C9B0500FC057C9B5F7F9 /* iOS */ = {
 			isa = PBXGroup;
 			children = (
-				9FA94713C9C1182C79A5221D /* ios */,
+				1A661AC3BAB935DB89FC9E66 /* ios */,
 			);
 			name = iOS;
 			sourceTree = "<group>";
@@ -96,6 +139,7 @@
 		BD9EB0DC0C7F11E699F6C697 /* DiceDemo */ = {
 			isa = PBXGroup;
 			children = (
+				47CE796755ABFCB559F9CB98 /* Assets.xcassets */,
 				2EFFB7B3DC86374786F23032 /* ContentView.swift */,
 				5BB09385320240B9B2D6A6EA /* DiceDemo-Bridging-Header.h */,
 				1EFF319545152926F7CA74F6 /* DiceDemoApp.swift */,
@@ -108,8 +152,17 @@
 			isa = PBXGroup;
 			children = (
 				11929CD91EC296EFAB7CC470 /* dice.filamat */,
+				35A1250A9A7B7DE62EE2F80A /* atlas */,
 			);
 			name = Resources;
+			sourceTree = "<group>";
+		};
+		FE0099FA3DAD5201BB82CA7E /* assets */ = {
+			isa = PBXGroup;
+			children = (
+				35A1250A9A7B7DE62EE2F80A /* atlas */,
+			);
+			path = assets;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
@@ -172,6 +225,15 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				5773A71F76C0F723491D72A5 /* Assets.xcassets in Resources */,
+				D6B06F2871B917DF1A226706 /* d10.png in Resources */,
+				55F6A83D57E705E38FFB57EA /* d12.png in Resources */,
+				4669217E64921EA12ADD649E /* d16.png in Resources */,
+				B1C0F6965E3E8046F80DA15D /* d20.png in Resources */,
+				FD242DF2C98A3D18D8F13E80 /* d32.png in Resources */,
+				EDD70930C80551864F3AD825 /* d4.png in Resources */,
+				8C72C3768B30EC9DF10809A2 /* d6.png in Resources */,
+				2DFD267843027693041C9CA6 /* d8.png in Resources */,
 				8D820CACE74FE415E714330F /* dice.filamat in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -186,8 +248,8 @@
 				4A0942BF478EC517F6BD27AC /* ContentView.swift in Sources */,
 				DF2068795907692352637CBD /* DiceDemoApp.swift in Sources */,
 				D55892ABB1071CED28173C8E /* DiceGameView.swift in Sources */,
-				1863D850D805438A647628BE /* DiceRenderer.mm in Sources */,
-				CD150CB05CE616099BE8E629 /* DiceView.mm in Sources */,
+				CFC9EA5A6FB1AF8BA69C126A /* DiceRenderer.mm in Sources */,
+				1F9DC9FD67CAEF6D4B42541A /* DiceView.mm in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -257,6 +319,7 @@
 				CLANG_ENABLE_MODULES = YES;
 				CODE_SIGN_IDENTITY = "iPhone Developer";
 				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
 				DEVELOPMENT_TEAM = 59S95D279D;
 				ENABLE_BITCODE = NO;
 				FRAMEWORK_SEARCH_PATHS = (
@@ -283,6 +346,7 @@
 					"$(PROJECT_DIR)/../../build-ios-sim-arm64/core",
 					"/tmp/filament-ios-sim",
 				);
+				MARKETING_VERSION = 0.2.0;
 				OTHER_LDFLAGS = (
 					"-ldice3d",
 					"-lfilament",
@@ -311,6 +375,7 @@
 				CLANG_ENABLE_MODULES = YES;
 				CODE_SIGN_IDENTITY = "iPhone Developer";
 				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
 				DEVELOPMENT_TEAM = 59S95D279D;
 				ENABLE_BITCODE = NO;
 				FRAMEWORK_SEARCH_PATHS = (
@@ -337,6 +402,7 @@
 					"$(PROJECT_DIR)/../../build-ios-sim-arm64/core",
 					"/tmp/filament-ios-sim",
 				);
+				MARKETING_VERSION = 0.2.0;
 				OTHER_LDFLAGS = (
 					"-ldice3d",
 					"-lfilament",

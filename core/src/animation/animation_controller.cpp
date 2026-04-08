@@ -7,9 +7,41 @@ using namespace dice3d;
 
 // Correction blend starts at this fraction of duration
 static constexpr float kCorrectionStart = 0.70f;
+static constexpr float kPresentationSlowdown = 0.15f;
 
 AnimationController::AnimationController()
     : _rng(std::random_device{}()) {}
+
+void AnimationController::startIdleSpin(float speed) {
+    std::uniform_real_distribution<float> axisDist(-1.0f, 1.0f);
+    glm::vec3 axis(axisDist(_rng), axisDist(_rng), axisDist(_rng));
+    if (glm::length(axis) < 1e-6f) axis = glm::vec3(0, 1, 0);
+    _idleAngularVelocity = glm::normalize(axis) * std::max(speed, 0.0f);
+    _state = State::IdleSpinning;
+}
+
+void AnimationController::stopIdleSpin() {
+    _idleAngularVelocity = glm::vec3(0.0f);
+    _state = State::Idle;
+}
+
+void AnimationController::startPresentationSpin(float speed, float duration) {
+    startIdleSpin(speed);
+    _presentationDuration = std::max(duration, 0.0f);
+    _presentationElapsed = 0.0f;
+}
+
+void AnimationController::beginDrag() {
+    _state = State::Idle;
+}
+
+void AnimationController::dragBy(float deltaYaw, float deltaPitch) {
+    glm::quat yaw = glm::angleAxis(deltaYaw, glm::vec3(0, 1, 0));
+    glm::quat pitch = glm::angleAxis(deltaPitch, glm::vec3(1, 0, 0));
+    _orientation = glm::normalize(yaw * pitch * _orientation);
+}
+
+void AnimationController::endDrag() {}
 
 void AnimationController::roll(const glm::quat& target, float duration) {
     _target   = glm::normalize(target);
@@ -48,6 +80,29 @@ void AnimationController::initTumble() {
 }
 
 void AnimationController::tick(float dt) {
+    if (_state == State::IdleSpinning) {
+        if (_presentationDuration > 0.0f) {
+            _presentationElapsed += dt;
+            float t = std::min(_presentationElapsed / _presentationDuration, 1.0f);
+            float speedMul = 1.0f - (1.0f - kPresentationSlowdown) * t;
+            float angle = glm::length(_idleAngularVelocity) * speedMul * dt;
+            if (angle > 1e-6f) {
+                glm::quat delta = glm::angleAxis(angle, glm::normalize(_idleAngularVelocity));
+                _orientation = glm::normalize(delta * _orientation);
+            }
+            if (t >= 1.0f) {
+                stopIdleSpin();
+                _state = State::Settled;
+            }
+            return;
+        }
+        float angle = glm::length(_idleAngularVelocity) * dt;
+        if (angle > 1e-6f) {
+            glm::quat delta = glm::angleAxis(angle, glm::normalize(_idleAngularVelocity));
+            _orientation = glm::normalize(delta * _orientation);
+        }
+        return;
+    }
     if (_state != State::Spinning) return;
 
     _elapsed += dt;

@@ -21,6 +21,7 @@
 #include <filament/MaterialInstance.h>
 #include <filament/Texture.h>
 #include <filament/TextureSampler.h>
+#include <filament/IndirectLight.h>
 #include <filament/LightManager.h>
 #include <unordered_map>
 #endif
@@ -46,6 +47,7 @@ public:
     void attachSurface(void* nativeWindow, uint32_t width, uint32_t height);
     void detachSurface();
     void resize(uint32_t width, uint32_t height);
+    void setCameraDistance(float distance);
 
     // Call before addDie. filamatData = compiled .filamat binary.
     void loadMaterial(const void* filamatData, size_t size);
@@ -70,7 +72,11 @@ private:
     utils::Entity        _cameraEntity;
     filament::Material*  _material      = nullptr;
     filament::Texture*   _atlasTexture  = nullptr;
+    filament::IndirectLight* _ibl       = nullptr;
     utils::Entity        _sunLight;
+    uint32_t             _viewportWidth  = 1;
+    uint32_t             _viewportHeight = 1;
+    float                _cameraDistance = 15.0f;
 
     std::unordered_map<uint32_t, DieInstance> _dice;
     uint32_t _nextHandle = 1;
@@ -91,6 +97,7 @@ public:
     void attachSurface(void*, uint32_t, uint32_t) {}
     void detachSurface() {}
     void resize(uint32_t, uint32_t) {}
+    void setCameraDistance(float) {}
     uint32_t addDie(const GpuMesh&, const glm::vec4&, bool) { return 0; }
     void removeDie(uint32_t) {}
     void setDieTransform(uint32_t, const glm::quat&, const glm::vec3&) {}

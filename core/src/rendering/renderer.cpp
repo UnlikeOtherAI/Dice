@@ -65,6 +65,10 @@ Renderer::~Renderer() {
         _engine->getLightManager().destroy(_sunLight);
         utils::EntityManager::get().destroy(_sunLight);
     }
+    if (_ibl) {
+        _scene->setIndirectLight(nullptr);
+        _engine->destroy(_ibl);
+    }
 
     // Destroy material and atlas texture
     if (_atlasTexture) _engine->destroy(_atlasTexture);
@@ -102,19 +106,28 @@ void Renderer::detachSurface() {
 }
 
 void Renderer::resize(uint32_t w, uint32_t h) {
+    _viewportWidth = w;
+    _viewportHeight = h;
     _view->setViewport({0, 0, w, h});
     setupCamera(w, h);
 }
 
+void Renderer::setCameraDistance(float distance) {
+    _cameraDistance = std::max(distance, 1.0f);
+    setupCamera(_viewportWidth, _viewportHeight);
+}
+
 void Renderer::setupCamera(uint32_t w, uint32_t h) {
     float aspect = (h > 0) ? (float)w / (float)h : 1.0f;
-    // Pull the camera farther back to avoid near-plane clipping when the
-    // simulator uses the full native drawable size.
     _camera->setProjection(45.0, aspect, 0.1, 200.0);
-    _camera->lookAt({0,0,15}, {0,0,0}, {0,1,0});
+    _camera->lookAt({0,0,_cameraDistance}, {0,0,0}, {0,1,0});
 }
 
 void Renderer::setupLighting() {
+    static constexpr filament::math::float3 kAmbientIrradiance[] = {
+        {0.28f, 0.29f, 0.30f}
+    };
+
     _sunLight = utils::EntityManager::get().create();
     filament::LightManager::Builder(filament::LightManager::Type::SUN)
         .color(filament::Color::toLinear<filament::ACCURATE>({1.0f, 1.0f, 1.0f}))
@@ -124,6 +137,12 @@ void Renderer::setupLighting() {
         .castShadows(false)
         .build(*_engine, _sunLight);
     _scene->addEntity(_sunLight);
+
+    _ibl = filament::IndirectLight::Builder()
+        .irradiance(1, kAmbientIrradiance)
+        .intensity(18000.0f)
+        .build(*_engine);
+    _scene->setIndirectLight(_ibl);
 }
 
 uint32_t Renderer::addDie(const GpuMesh& mesh, const glm::vec4& dieColor, bool whiteNumbers) {
@@ -236,6 +255,8 @@ uint32_t Renderer::addDie(const GpuMesh& mesh, const glm::vec4& dieColor, bool w
         if (_atlasTexture) {
             filament::TextureSampler sampler(filament::TextureSampler::MinFilter::LINEAR,
                                             filament::TextureSampler::MagFilter::LINEAR);
+            sampler.setWrapModeS(filament::TextureSampler::WrapMode::CLAMP_TO_EDGE);
+            sampler.setWrapModeT(filament::TextureSampler::WrapMode::CLAMP_TO_EDGE);
             die.matInst->setParameter("numberAtlas", _atlasTexture, sampler);
         }
     }

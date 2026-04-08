@@ -30,6 +30,22 @@ TEST_CASE("face mapper: applying quaternion makes face normal point toward camer
     }
 }
 
+TEST_CASE("face mapper: applying quaternion keeps face up aligned with camera up") {
+    auto mesh = Chamfer::apply(Polyhedra::generate(20), 0.05f);
+    FaceMapper mapper(mesh, kCameraDir, kCameraUp);
+    for (const auto& face : mesh.faces) {
+        if (face.faceNumber <= 0) continue;
+        glm::quat q = mapper.orientationForFace(face.faceNumber);
+        glm::vec3 rotatedNormal = q * face.normal;
+        glm::vec3 rotatedUp = glm::normalize(q * face.up);
+        glm::vec3 upOnFacePlane = glm::normalize(
+            rotatedUp - rotatedNormal * glm::dot(rotatedNormal, rotatedUp)
+        );
+        float d = glm::dot(upOnFacePlane, -kCameraUp);
+        REQUIRE_THAT(d, Catch::Matchers::WithinAbs(1.0f, 0.01f));
+    }
+}
+
 TEST_CASE("face mapper d20 has entries for all 20 faces") {
     auto mesh = Chamfer::apply(Polyhedra::generate(20), 0.05f);
     FaceMapper mapper(mesh, kCameraDir, kCameraUp);

@@ -31,6 +31,10 @@ void dice3d_resize(Dice3DSceneRef scene, uint32_t width, uint32_t height) {
     toScene(scene)->resize(width, height);
 }
 
+void dice3d_set_camera_distance(Dice3DSceneRef scene, float distance) {
+    toScene(scene)->setCameraDistance(distance);
+}
+
 uint32_t dice3d_add_die(Dice3DSceneRef scene, int sides,
                         float bevel,
                         float r, float g, float b, float a,
@@ -54,6 +58,33 @@ void dice3d_roll(Dice3DSceneRef scene, uint32_t handle,
     } catch (const std::out_of_range&) {
         // Invalid face number — silently ignore; die stays in current orientation
     }
+}
+
+void dice3d_set_presentation_mode(Dice3DSceneRef scene, uint32_t handle,
+                                  Dice3DPresentationMode mode,
+                                  float speed, float duration) {
+    toScene(scene)->setPresentationMode(
+        handle,
+        static_cast<dice3d::PresentationMode>(mode),
+        speed,
+        duration
+    );
+}
+
+void dice3d_set_idle_spin_speed(Dice3DSceneRef scene, uint32_t handle, float speed) {
+    toScene(scene)->setIdleSpinSpeed(handle, speed);
+}
+
+void dice3d_begin_drag(Dice3DSceneRef scene, uint32_t handle) {
+    toScene(scene)->beginDrag(handle);
+}
+
+void dice3d_drag_by(Dice3DSceneRef scene, uint32_t handle, float deltaX, float deltaY) {
+    toScene(scene)->dragBy(handle, deltaX, deltaY);
+}
+
+void dice3d_end_drag(Dice3DSceneRef scene, uint32_t handle) {
+    toScene(scene)->endDrag(handle);
 }
 
 void dice3d_tick(Dice3DSceneRef scene, float dt) {

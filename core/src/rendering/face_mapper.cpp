@@ -35,7 +35,7 @@ glm::quat FaceMapper::basisToCamera(
     // Strategy: construct two orthonormal bases and build a rotation matrix
     // that maps from-basis to to-basis.
 
-    // "From" basis: (faceNormal, faceUp_ortho, faceRight)
+    // "From" basis: (faceRight, faceUp_ortho, faceNormal)
     glm::vec3 fn_n = glm::normalize(fn);
     glm::vec3 fu_n = glm::normalize(fu - fn_n * glm::dot(fn_n, fu));  // Gram-Schmidt
     if (glm::length(fu_n) < 1e-5f) {
@@ -45,23 +45,26 @@ glm::quat FaceMapper::basisToCamera(
     } else {
         fu_n = glm::normalize(fu_n);
     }
-    glm::vec3 fr_n = glm::normalize(glm::cross(fn_n, fu_n));
+    glm::vec3 fr_n = glm::normalize(glm::cross(fu_n, fn_n));
 
-    // "To" basis: (-cameraForward, cameraUp_ortho, cameraRight)
+    // UIKit / texture-space orientation means the visually upright label lands
+    // with face-up aligned to screen-down in world space.
+    // "To" basis: (cameraRight, -cameraUp_ortho, -cameraForward)
     glm::vec3 tn = glm::normalize(-cf);
-    glm::vec3 tu = glm::normalize(cu - tn * glm::dot(tn, cu));
+    glm::vec3 targetUp = -cu;
+    glm::vec3 tu = glm::normalize(targetUp - tn * glm::dot(tn, targetUp));
     if (glm::length(tu) < 1e-5f) {
         glm::vec3 arb = std::abs(tn.x) < 0.9f ? glm::vec3(1,0,0) : glm::vec3(0,1,0);
         tu = glm::normalize(arb - tn * glm::dot(tn, arb));
     } else {
         tu = glm::normalize(tu);
     }
-    glm::vec3 tr = glm::normalize(glm::cross(tn, tu));
+    glm::vec3 tr = glm::normalize(glm::cross(tu, tn));
 
     // R = toBasis * transpose(fromBasis)
     // glm::mat3 columns are the basis vectors
-    glm::mat3 fromBasis(fn_n, fu_n, fr_n);  // columns: from-normal, from-up, from-right
-    glm::mat3 toBasis(tn, tu, tr);          // columns: to-normal, to-up, to-right
+    glm::mat3 fromBasis(fr_n, fu_n, fn_n);  // columns: from-right, from-up, from-normal
+    glm::mat3 toBasis(tr, tu, tn);          // columns: to-right, to-up, to-normal
     glm::mat3 R = toBasis * glm::transpose(fromBasis);
     return glm::normalize(glm::quat_cast(R));
 }
