@@ -19,6 +19,14 @@ add_library(dice3d STATIC
 target_include_directories(dice3d PUBLIC include)
 target_include_directories(dice3d PRIVATE ${FILAMENT_DIR}/include)
 
+# Enable real Filament renderer if headers are present
+if(EXISTS "${FILAMENT_DIR}/include/filament/Engine.h")
+    target_compile_definitions(dice3d PRIVATE DICE3D_HAVE_FILAMENT=1)
+    message(STATUS "Filament found at ${FILAMENT_DIR} — full renderer enabled")
+else()
+    message(STATUS "Filament stub at ${FILAMENT_DIR} — renderer is a compile stub")
+endif()
+
 # --- Tests ---
 if(BUILD_TESTING)
     include(FetchContent)
