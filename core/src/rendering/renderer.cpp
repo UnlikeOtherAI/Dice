@@ -30,6 +30,13 @@ Renderer::Renderer(filament::Engine::Backend backend) {
     setupLighting();
 }
 
+void Renderer::loadMaterial(const void* data, size_t size) {
+    if (_material) _engine->destroy(_material);
+    _material = filament::Material::Builder()
+        .package(data, size)
+        .build(*_engine);
+}
+
 Renderer::~Renderer() {
     // Destroy all die resources
     for (auto& [h, die] : _dice) destroyDieResources(die);
@@ -188,16 +195,26 @@ uint32_t Renderer::addDie(const GpuMesh& mesh, const glm::vec4& dieColor, bool /
     // --- Entity + renderable ---
     die.entity = utils::EntityManager::get().create();
 
-    // TODO(Task 13): bind material instance once .filamat is available.
-    // Without a material, Filament uses its default material (unlit gray).
-    filament::RenderableManager::Builder(1)
+    // Bind material instance if a material has been loaded via loadMaterial().
+    if (_material) {
+        die.matInst = _material->createInstance();
+        die.matInst->setParameter("dieColor",
+            filament::math::float4{dieColor.r, dieColor.g, dieColor.b, dieColor.a});
+        die.matInst->setParameter("numberColor",
+            whiteNumbers
+                ? filament::math::float4{1,1,1,1}
+                : filament::math::float4{0,0,0,1});
+    }
+
+    auto rb = filament::RenderableManager::Builder(1)
         .boundingBox({{-2,-2,-2},{2,2,2}})
         .geometry(0, filament::RenderableManager::PrimitiveType::TRIANGLES,
                   die.vb, die.ib)
         .culling(false)
         .receiveShadows(false)
-        .castShadows(false)
-        .build(*_engine, die.entity);
+        .castShadows(false);
+    if (die.matInst) rb.material(0, die.matInst);
+    rb.build(*_engine, die.entity);
 
     // Register with TransformManager so setDieTransform can obtain a valid instance.
     auto& tcm = _engine->getTransformManager();

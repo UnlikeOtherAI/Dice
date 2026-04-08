@@ -45,6 +45,9 @@ public:
     void detachSurface();
     void resize(uint32_t width, uint32_t height);
 
+    // Call once after construction, before addDie. filamatData is the compiled .filamat binary.
+    void loadMaterial(const void* filamatData, size_t size);
+
     uint32_t addDie(const GpuMesh& mesh, const glm::vec4& dieColor, bool whiteNumbers);
     void removeDie(uint32_t handle);
     void setDieTransform(uint32_t handle, const glm::quat& orientation, const glm::vec3& position);
@@ -78,6 +81,7 @@ class Renderer {
 public:
     explicit Renderer(int backend = 0) {}
     ~Renderer() = default;
+    void loadMaterial(const void*, size_t) {}
     void attachSurface(void*, uint32_t, uint32_t) {}
     void detachSurface() {}
     void resize(uint32_t, uint32_t) {}

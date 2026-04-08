@@ -14,6 +14,10 @@ DiceScene::DiceScene(int backend)
 #endif
 {}
 
+void DiceScene::loadMaterial(const void* data, size_t size) {
+    _renderer->loadMaterial(data, size);
+}
+
 void DiceScene::attachSurface(void* nativeWindow, uint32_t w, uint32_t h) {
     _renderer->attachSurface(nativeWindow, w, h);
 }

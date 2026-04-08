@@ -1,4 +1,5 @@
 #pragma once
+#include <stddef.h>
 #include <stdint.h>
 
 #ifdef __cplusplus
@@ -29,6 +30,10 @@ void dice3d_roll(Dice3DSceneRef scene, uint32_t handle,
 
 void dice3d_tick(Dice3DSceneRef scene, float dt);
 void dice3d_render_frame(Dice3DSceneRef scene);
+
+// Optional: call before addDie to enable PBR number rendering.
+// data = compiled .filamat binary, size = byte length.
+void dice3d_load_material(Dice3DSceneRef scene, const void* data, size_t size);
 
 #ifdef __cplusplus
 }

@@ -28,6 +28,8 @@ public:
     void detachSurface();
     void resize(uint32_t w, uint32_t h);
 
+    void loadMaterial(const void* filamatData, size_t size);
+
     // NOTE: Synchronous mesh build. Avoid calling on the main thread for d32.
     uint32_t addDie(const DieConfig& config);
     void removeDie(uint32_t handle);

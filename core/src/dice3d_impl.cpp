@@ -64,4 +64,8 @@ void dice3d_render_frame(Dice3DSceneRef scene) {
     toScene(scene)->renderFrame();
 }
 
+void dice3d_load_material(Dice3DSceneRef scene, const void* data, size_t size) {
+    toScene(scene)->loadMaterial(data, size);
+}
+
 } // extern "C"
