@@ -1,5 +1,6 @@
 #!/bin/bash
 set -e
+mkdir -p dist
 xcodebuild -create-xcframework \
     -library build-ios/device/core/libdice3d.a \
     -headers core/include \
