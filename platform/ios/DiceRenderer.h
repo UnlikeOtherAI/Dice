@@ -31,6 +31,7 @@ typedef NS_ENUM(NSInteger, DicePresentationMode) {
                       speed:(float)speed
                    duration:(float)duration;
 - (void)setIdleSpinSpeed:(float)speed forDie:(uint32_t)handle;
+- (void)setSelectionFlashEnabled:(BOOL)enabled forDie:(uint32_t)handle;
 - (void)beginDragForDie:(uint32_t)handle;
 - (void)dragDie:(uint32_t)handle deltaX:(float)deltaX deltaY:(float)deltaY;
 - (void)endDragForDie:(uint32_t)handle;

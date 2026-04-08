@@ -23,6 +23,7 @@ struct DieConfig {
     float bevelFactor = 0.05f;
     glm::vec4 dieColor{0.8f, 0.1f, 0.1f, 1.0f};  // RGBA
     bool  whiteNumbers = true;
+    bool  selectionFlashEnabled = true;
     PresentationMode presentationMode = PresentationMode::SpinIn;
     float idleSpinSpeed = 0.9f;
     float presentationSpinSpeed = 3.0f;
@@ -55,6 +56,7 @@ public:
     void rollAll(const std::vector<std::pair<uint32_t, int>>& rolls, float duration);
     void setPresentationMode(uint32_t handle, PresentationMode mode, float speed, float duration);
     void setIdleSpinSpeed(uint32_t handle, float speed);
+    void setSelectionFlashEnabled(uint32_t handle, bool enabled);
     void beginDrag(uint32_t handle);
     void dragBy(uint32_t handle, float deltaX, float deltaY);
     void endDrag(uint32_t handle);
@@ -74,6 +76,10 @@ private:
         float presentationSpinSpeed = 3.0f;
         float presentationDuration = 0.45f;
         float dragSensitivity = 0.01f;
+        bool selectionFlashEnabled = true;
+        int pendingFlashFace = 0;
+        int flashingFace = 0;
+        float flashElapsed = 0.0f;
     };
 
     std::unique_ptr<Renderer> _renderer;

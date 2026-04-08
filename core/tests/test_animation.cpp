@@ -2,6 +2,7 @@
 #include <catch2/matchers/catch_matchers_floating_point.hpp>
 #include "dice3d/animation/quaternion_utils.h"
 #include "dice3d/animation/animation_controller.h"
+#include "dice3d/dice_scene.h"
 #include <cmath>
 using namespace dice3d;
 
@@ -32,6 +33,11 @@ TEST_CASE("easeOutQuint at t=0 is 0, t=1 is 1") {
 TEST_CASE("animation starts in idle state") {
     AnimationController ctrl;
     REQUIRE(ctrl.state() == AnimationController::State::Idle);
+}
+
+TEST_CASE("die config enables selection flash by default") {
+    DieConfig cfg{};
+    REQUIRE(cfg.selectionFlashEnabled);
 }
 
 TEST_CASE("idle spin changes orientation over time") {

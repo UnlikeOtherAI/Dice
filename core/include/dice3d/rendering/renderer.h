@@ -31,12 +31,25 @@ namespace dice3d {
 #ifdef DICE3D_HAVE_FILAMENT
 
 struct DieInstance {
+    struct HighlightFaceInstance {
+        int faceNumber = 0;
+        utils::Entity entity;
+        filament::VertexBuffer* vb = nullptr;
+        filament::IndexBuffer* ib = nullptr;
+        filament::MaterialInstance* matInst = nullptr;
+        bool inScene = false;
+    };
+
     uint32_t handle;
     utils::Entity entity;
     filament::VertexBuffer* vb   = nullptr;
     filament::IndexBuffer*  ib   = nullptr;
     filament::MaterialInstance* matInst = nullptr;
     glm::vec3 position{0,0,0};
+    glm::vec4 dieColor{1,1,1,1};
+    bool whiteNumbers = true;
+    std::unordered_map<int, HighlightFaceInstance> highlightFaces;
+    int activeHighlightFace = 0;
 };
 
 class Renderer {
@@ -57,6 +70,7 @@ public:
     uint32_t addDie(const GpuMesh& mesh, const glm::vec4& dieColor, bool whiteNumbers);
     void removeDie(uint32_t handle);
     void setDieTransform(uint32_t handle, const glm::quat& orientation, const glm::vec3& position);
+    void setDieFaceHighlight(uint32_t handle, int faceNumber, float intensity);
 
     void renderFrame();
 
@@ -84,6 +98,10 @@ private:
     void setupCamera(uint32_t width, uint32_t height);
     void setupLighting();
     void destroyDieResources(DieInstance& die);
+    filament::MaterialInstance* createMaterialInstance(const glm::vec4& dieColor, bool whiteNumbers);
+    void updateHighlightMaterial(DieInstance& die,
+                                 DieInstance::HighlightFaceInstance& highlight,
+                                 float intensity);
 };
 
 #else // stub for non-Filament builds
@@ -101,6 +119,7 @@ public:
     uint32_t addDie(const GpuMesh&, const glm::vec4&, bool) { return 0; }
     void removeDie(uint32_t) {}
     void setDieTransform(uint32_t, const glm::quat&, const glm::vec3&) {}
+    void setDieFaceHighlight(uint32_t, int, float) {}
     void renderFrame() {}
 };
 

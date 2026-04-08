@@ -38,6 +38,7 @@ void dice3d_set_presentation_mode(Dice3DSceneRef scene, uint32_t handle,
                                   Dice3DPresentationMode mode,
                                   float speed, float duration);
 void dice3d_set_idle_spin_speed(Dice3DSceneRef scene, uint32_t handle, float speed);
+void dice3d_set_selection_flash_enabled(Dice3DSceneRef scene, uint32_t handle, int enabled);
 void dice3d_begin_drag(Dice3DSceneRef scene, uint32_t handle);
 void dice3d_drag_by(Dice3DSceneRef scene, uint32_t handle, float deltaX, float deltaY);
 void dice3d_end_drag(Dice3DSceneRef scene, uint32_t handle);

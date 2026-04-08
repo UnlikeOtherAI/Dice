@@ -129,6 +129,10 @@
     dice3d_set_idle_spin_speed(_scene, handle, speed);
 }
 
+- (void)setSelectionFlashEnabled:(BOOL)enabled forDie:(uint32_t)handle {
+    dice3d_set_selection_flash_enabled(_scene, handle, enabled ? 1 : 0);
+}
+
 - (void)beginDragForDie:(uint32_t)handle {
     dice3d_begin_drag(_scene, handle);
 }

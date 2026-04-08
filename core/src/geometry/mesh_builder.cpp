@@ -33,6 +33,7 @@ GpuMesh MeshBuilder::build(const PolyMesh& mesh, int /*atlasSize*/) {
     }
 
     // --- Per-face vertex expansion + triangulation ---
+    std::set<int> capturedHighlightFaces;
     for (auto& face : mesh.faces) {
         const int vertCount = (int)face.indices.size();
         if (vertCount < 3) continue;
@@ -68,6 +69,8 @@ GpuMesh MeshBuilder::build(const PolyMesh& mesh, int /*atlasSize*/) {
         float halfExtent = std::max(std::max(maxAbsU, maxAbsV), 1e-6f);
 
         bool hasNumberCell = face.faceNumber > 0 && faceCell.count(face.faceNumber);
+        bool captureHighlightFace =
+            hasNumberCell && capturedHighlightFaces.insert(face.faceNumber).second;
         glm::vec4 cell = hasNumberCell ? faceCell[face.faceNumber] : glm::vec4(0.0f);
         float insetU0 = cell.x + cellW * kCellPadding;
         float insetV0 = cell.y + cellH * kCellPadding;
@@ -81,10 +84,16 @@ GpuMesh MeshBuilder::build(const PolyMesh& mesh, int /*atlasSize*/) {
         if (q.w < 0) q = -q;
         glm::vec4 tangentQ(q.x, q.y, q.z, q.w);
 
+        HighlightFaceMesh highlightFace;
+        if (captureHighlightFace) {
+            highlightFace.faceNumber = face.faceNumber;
+        }
+
         // Emit expanded vertices (face-local, no sharing)
         uint32_t baseIdx = (uint32_t)result.positions.size();
         for (int k = 0; k < vertCount; k++) {
-            result.positions.push_back(mesh.vertices[face.indices[k]]);
+            glm::vec3 position = mesh.vertices[face.indices[k]];
+            result.positions.push_back(position);
             result.normals.push_back(normal);
             result.tangents.push_back(tangentQ);
             // Keep the label centered and preserve aspect ratio instead of
@@ -102,6 +111,12 @@ GpuMesh MeshBuilder::build(const PolyMesh& mesh, int /*atlasSize*/) {
                 av = 0.0f;
             }
             result.uvs.push_back({au, av});
+            if (captureHighlightFace) {
+                highlightFace.positions.push_back(position);
+                highlightFace.normals.push_back(normal);
+                highlightFace.tangents.push_back(tangentQ);
+                highlightFace.uvs.push_back({au, av});
+            }
         }
 
         // Fan triangulation from vertex 0
@@ -109,6 +124,15 @@ GpuMesh MeshBuilder::build(const PolyMesh& mesh, int /*atlasSize*/) {
             result.indices.push_back(baseIdx);
             result.indices.push_back(baseIdx + k);
             result.indices.push_back(baseIdx + k + 1);
+            if (captureHighlightFace) {
+                highlightFace.indices.push_back(0);
+                highlightFace.indices.push_back((uint32_t)k);
+                highlightFace.indices.push_back((uint32_t)(k + 1));
+            }
+        }
+
+        if (captureHighlightFace) {
+            result.highlightFaces.push_back(std::move(highlightFace));
         }
     }
 

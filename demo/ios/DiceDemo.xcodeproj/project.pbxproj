@@ -319,7 +319,7 @@
 				CLANG_ENABLE_MODULES = YES;
 				CODE_SIGN_IDENTITY = "iPhone Developer";
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 1;
+				CURRENT_PROJECT_VERSION = 2;
 				DEVELOPMENT_TEAM = 59S95D279D;
 				ENABLE_BITCODE = NO;
 				FRAMEWORK_SEARCH_PATHS = (
@@ -342,11 +342,15 @@
 					"$(PROJECT_DIR)/../../build-ios-device/core",
 					"/tmp/filament-ios/filament/lib/universal",
 				);
+				"LIBRARY_SEARCH_PATHS[sdk=iphoneos*]" = (
+					"$(PROJECT_DIR)/../../build-ios-device/core/core/Release-iphoneos",
+					"/tmp/filament-ios/filament/lib/universal",
+				);
 				"LIBRARY_SEARCH_PATHS[sdk=iphonesimulator*]" = (
-					"$(PROJECT_DIR)/../../build-ios-sim-arm64/core",
+					"$(PROJECT_DIR)/../../build-ios-sim-arm64/core/core/Release-iphonesimulator",
 					"/tmp/filament-ios-sim",
 				);
-				MARKETING_VERSION = 0.2.0;
+				MARKETING_VERSION = 0.2.1;
 				OTHER_LDFLAGS = (
 					"-ldice3d",
 					"-lfilament",
@@ -375,7 +379,7 @@
 				CLANG_ENABLE_MODULES = YES;
 				CODE_SIGN_IDENTITY = "iPhone Developer";
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 1;
+				CURRENT_PROJECT_VERSION = 2;
 				DEVELOPMENT_TEAM = 59S95D279D;
 				ENABLE_BITCODE = NO;
 				FRAMEWORK_SEARCH_PATHS = (
@@ -398,11 +402,15 @@
 					"$(PROJECT_DIR)/../../build-ios-device/core",
 					"/tmp/filament-ios/filament/lib/universal",
 				);
+				"LIBRARY_SEARCH_PATHS[sdk=iphoneos*]" = (
+					"$(PROJECT_DIR)/../../build-ios-device/core/core/Debug-iphoneos",
+					"/tmp/filament-ios/filament/lib/universal",
+				);
 				"LIBRARY_SEARCH_PATHS[sdk=iphonesimulator*]" = (
-					"$(PROJECT_DIR)/../../build-ios-sim-arm64/core",
+					"$(PROJECT_DIR)/../../build-ios-sim-arm64/core/core/Debug-iphonesimulator",
 					"/tmp/filament-ios-sim",
 				);
-				MARKETING_VERSION = 0.2.0;
+				MARKETING_VERSION = 0.2.1;
 				OTHER_LDFLAGS = (
 					"-ldice3d",
 					"-lfilament",

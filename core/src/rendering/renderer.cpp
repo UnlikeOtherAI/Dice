@@ -9,8 +9,13 @@
 #include <filament/TransformManager.h>
 #include <math/mat4.h>
 #include <glm/gtx/quaternion.hpp>
+#include <algorithm>
 #include <stdexcept>
 using namespace dice3d;
+
+namespace {
+constexpr float kHighlightFaceOffset = 0.015f;
+}
 
 Renderer::Renderer(filament::Engine::Backend backend) {
     _engine   = filament::Engine::create(backend);
@@ -145,11 +150,54 @@ void Renderer::setupLighting() {
     _scene->setIndirectLight(_ibl);
 }
 
+filament::MaterialInstance* Renderer::createMaterialInstance(
+    const glm::vec4& dieColor,
+    bool whiteNumbers) {
+    if (!_material) return nullptr;
+
+    auto* matInst = _material->createInstance();
+    matInst->setParameter("dieColor",
+        filament::math::float4{dieColor.r, dieColor.g, dieColor.b, dieColor.a});
+    matInst->setParameter("numberColor",
+        whiteNumbers
+            ? filament::math::float4{1, 1, 1, 1}
+            : filament::math::float4{0, 0, 0, 1});
+    if (_atlasTexture) {
+        filament::TextureSampler sampler(filament::TextureSampler::MinFilter::LINEAR,
+                                         filament::TextureSampler::MagFilter::LINEAR);
+        sampler.setWrapModeS(filament::TextureSampler::WrapMode::CLAMP_TO_EDGE);
+        sampler.setWrapModeT(filament::TextureSampler::WrapMode::CLAMP_TO_EDGE);
+        matInst->setParameter("numberAtlas", _atlasTexture, sampler);
+    }
+    return matInst;
+}
+
+void Renderer::updateHighlightMaterial(
+    DieInstance& die,
+    DieInstance::HighlightFaceInstance& highlight,
+    float intensity) {
+    if (!highlight.matInst) return;
+
+    float t = std::clamp(intensity, 0.0f, 1.0f);
+    glm::vec3 base = glm::vec3(die.dieColor);
+    glm::vec3 lit = glm::mix(base, glm::vec3(1.0f), 0.30f + 0.45f * t);
+    lit = glm::min(lit * (1.0f + 0.20f * t), glm::vec3(1.0f));
+
+    highlight.matInst->setParameter("dieColor",
+        filament::math::float4{lit.r, lit.g, lit.b, die.dieColor.a});
+    highlight.matInst->setParameter("numberColor",
+        die.whiteNumbers
+            ? filament::math::float4{1, 1, 1, 1}
+            : filament::math::float4{0, 0, 0, 1});
+}
+
 uint32_t Renderer::addDie(const GpuMesh& mesh, const glm::vec4& dieColor, bool whiteNumbers) {
     uint32_t handle = _nextHandle++;
 
     DieInstance die;
     die.handle = handle;
+    die.dieColor = dieColor;
+    die.whiteNumbers = whiteNumbers;
 
     // --- Vertex buffer ---
     auto vbBuilder = filament::VertexBuffer::Builder()
@@ -244,22 +292,7 @@ uint32_t Renderer::addDie(const GpuMesh& mesh, const glm::vec4& dieColor, bool w
     die.entity = utils::EntityManager::get().create();
 
     // Bind material instance if a material has been loaded.
-    if (_material) {
-        die.matInst = _material->createInstance();
-        die.matInst->setParameter("dieColor",
-            filament::math::float4{dieColor.r, dieColor.g, dieColor.b, dieColor.a});
-        die.matInst->setParameter("numberColor",
-            whiteNumbers
-                ? filament::math::float4{1,1,1,1}
-                : filament::math::float4{0,0,0,1});
-        if (_atlasTexture) {
-            filament::TextureSampler sampler(filament::TextureSampler::MinFilter::LINEAR,
-                                            filament::TextureSampler::MagFilter::LINEAR);
-            sampler.setWrapModeS(filament::TextureSampler::WrapMode::CLAMP_TO_EDGE);
-            sampler.setWrapModeT(filament::TextureSampler::WrapMode::CLAMP_TO_EDGE);
-            die.matInst->setParameter("numberAtlas", _atlasTexture, sampler);
-        }
-    }
+    die.matInst = createMaterialInstance(dieColor, whiteNumbers);
 
     filament::RenderableManager::Builder rb(1);
     rb.boundingBox({{-2,-2,-2},{2,2,2}})
@@ -275,6 +308,110 @@ uint32_t Renderer::addDie(const GpuMesh& mesh, const glm::vec4& dieColor, bool w
     auto& tcm = _engine->getTransformManager();
     tcm.create(die.entity);
 
+    for (const auto& faceMesh : mesh.highlightFaces) {
+        DieInstance::HighlightFaceInstance highlight;
+        highlight.faceNumber = faceMesh.faceNumber;
+        highlight.entity = utils::EntityManager::get().create();
+
+        highlight.vb = filament::VertexBuffer::Builder()
+            .vertexCount((uint32_t)faceMesh.positions.size())
+            .bufferCount(4)
+            .attribute(filament::VertexAttribute::POSITION, 0,
+                       filament::VertexBuffer::AttributeType::FLOAT3)
+            .attribute(filament::VertexAttribute::TANGENTS, 1,
+                       filament::VertexBuffer::AttributeType::HALF4)
+            .attribute(filament::VertexAttribute::UV0, 2,
+                       filament::VertexBuffer::AttributeType::FLOAT2)
+            .attribute(filament::VertexAttribute::COLOR, 3,
+                       filament::VertexBuffer::AttributeType::FLOAT3)
+            .build(*_engine);
+
+        auto* highlightPositions = new std::vector<glm::vec3>(faceMesh.positions);
+        for (size_t i = 0; i < highlightPositions->size(); ++i) {
+            (*highlightPositions)[i] += faceMesh.normals[i] * kHighlightFaceOffset;
+        }
+        highlight.vb->setBufferAt(*_engine, 0, filament::VertexBuffer::BufferDescriptor(
+            highlightPositions->data(),
+            highlightPositions->size() * sizeof(glm::vec3),
+            [](void*, size_t, void* user) {
+                delete static_cast<std::vector<glm::vec3>*>(user);
+            },
+            highlightPositions));
+
+        std::vector<uint16_t> half4tangents;
+        half4tangents.reserve(faceMesh.tangents.size() * 4);
+        for (auto& t : faceMesh.tangents) {
+            auto toHalf = [](float f) -> uint16_t {
+                uint32_t x; memcpy(&x, &f, 4);
+                uint16_t h = (x >> 16) & 0x8000;
+                int e = ((x >> 23) & 0xFF) - 127 + 15;
+                if (e <= 0) return h;
+                if (e >= 31) return h | 0x7C00;
+                return h | (e << 10) | ((x >> 13) & 0x3FF);
+            };
+            half4tangents.push_back(toHalf(t.x));
+            half4tangents.push_back(toHalf(t.y));
+            half4tangents.push_back(toHalf(t.z));
+            half4tangents.push_back(toHalf(t.w));
+        }
+        auto* highlightTangents = new std::vector<uint16_t>(std::move(half4tangents));
+        highlight.vb->setBufferAt(*_engine, 1, filament::VertexBuffer::BufferDescriptor(
+            highlightTangents->data(),
+            highlightTangents->size() * sizeof(uint16_t),
+            [](void*, size_t, void* user) {
+                delete static_cast<std::vector<uint16_t>*>(user);
+            },
+            highlightTangents));
+
+        auto* highlightUvs = new std::vector<glm::vec2>(faceMesh.uvs);
+        highlight.vb->setBufferAt(*_engine, 2, filament::VertexBuffer::BufferDescriptor(
+            highlightUvs->data(),
+            highlightUvs->size() * sizeof(glm::vec2),
+            [](void*, size_t, void* user) {
+                delete static_cast<std::vector<glm::vec2>*>(user);
+            },
+            highlightUvs));
+
+        auto* highlightColors = new std::vector<glm::vec3>(
+            faceMesh.positions.size(), glm::vec3(dieColor.r, dieColor.g, dieColor.b));
+        highlight.vb->setBufferAt(*_engine, 3, filament::VertexBuffer::BufferDescriptor(
+            highlightColors->data(),
+            highlightColors->size() * sizeof(glm::vec3),
+            [](void*, size_t, void* user) {
+                delete static_cast<std::vector<glm::vec3>*>(user);
+            },
+            highlightColors));
+
+        highlight.ib = filament::IndexBuffer::Builder()
+            .indexCount((uint32_t)faceMesh.indices.size())
+            .bufferType(filament::IndexBuffer::IndexType::UINT)
+            .build(*_engine);
+        auto* highlightIndices = new std::vector<uint32_t>(faceMesh.indices);
+        highlight.ib->setBuffer(*_engine, filament::IndexBuffer::BufferDescriptor(
+            highlightIndices->data(),
+            highlightIndices->size() * sizeof(uint32_t),
+            [](void*, size_t, void* user) {
+                delete static_cast<std::vector<uint32_t>*>(user);
+            },
+            highlightIndices));
+
+        highlight.matInst = createMaterialInstance(dieColor, whiteNumbers);
+        updateHighlightMaterial(die, highlight, 0.0f);
+
+        filament::RenderableManager::Builder highlightRenderable(1);
+        highlightRenderable.boundingBox({{-2,-2,-2},{2,2,2}})
+            .geometry(0, filament::RenderableManager::PrimitiveType::TRIANGLES,
+                      highlight.vb, highlight.ib)
+            .culling(false)
+            .receiveShadows(false)
+            .castShadows(false);
+        if (highlight.matInst) highlightRenderable.material(0, highlight.matInst);
+        highlightRenderable.build(*_engine, highlight.entity);
+
+        tcm.create(highlight.entity);
+        die.highlightFaces.emplace(highlight.faceNumber, std::move(highlight));
+    }
+
     _scene->addEntity(die.entity);
     _dice[handle] = std::move(die);
     return handle;
@@ -288,6 +425,14 @@ void Renderer::removeDie(uint32_t handle) {
 }
 
 void Renderer::destroyDieResources(DieInstance& die) {
+    for (auto& [faceNumber, highlight] : die.highlightFaces) {
+        if (highlight.inScene) _scene->remove(highlight.entity);
+        _engine->getRenderableManager().destroy(highlight.entity);
+        utils::EntityManager::get().destroy(highlight.entity);
+        if (highlight.vb) _engine->destroy(highlight.vb);
+        if (highlight.ib) _engine->destroy(highlight.ib);
+        if (highlight.matInst) _engine->destroy(highlight.matInst);
+    }
     _scene->remove(die.entity);
     _engine->getRenderableManager().destroy(die.entity);
     utils::EntityManager::get().destroy(die.entity);
@@ -310,6 +455,39 @@ void Renderer::setDieTransform(uint32_t handle, const glm::quat& orientation,
     filament::math::mat4f R = filament::math::mat4f(filament::math::mat3f(
         filament::math::quatf{orientation.w, orientation.x, orientation.y, orientation.z}));
     tcm.setTransform(inst, T * R);
+    for (auto& [faceNumber, highlight] : it->second.highlightFaces) {
+        auto highlightInst = tcm.getInstance(highlight.entity);
+        tcm.setTransform(highlightInst, T * R);
+    }
+}
+
+void Renderer::setDieFaceHighlight(uint32_t handle, int faceNumber, float intensity) {
+    auto it = _dice.find(handle);
+    if (it == _dice.end()) return;
+    auto& die = it->second;
+
+    int targetFace = intensity > 1e-4f ? faceNumber : 0;
+    if (die.activeHighlightFace != 0 && die.activeHighlightFace != targetFace) {
+        auto current = die.highlightFaces.find(die.activeHighlightFace);
+        if (current != die.highlightFaces.end() && current->second.inScene) {
+            _scene->remove(current->second.entity);
+            current->second.inScene = false;
+        }
+        die.activeHighlightFace = 0;
+    }
+
+    if (targetFace == 0) return;
+
+    auto highlightIt = die.highlightFaces.find(targetFace);
+    if (highlightIt == die.highlightFaces.end()) return;
+
+    auto& highlight = highlightIt->second;
+    updateHighlightMaterial(die, highlight, intensity);
+    if (!highlight.inScene) {
+        _scene->addEntity(highlight.entity);
+        highlight.inScene = true;
+    }
+    die.activeHighlightFace = targetFace;
 }
 
 void Renderer::renderFrame() {

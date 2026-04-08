@@ -83,6 +83,59 @@ TEST_CASE("d32 covers at least 32 distinct face numbers") {
     REQUIRE(*nums.rbegin() == 32);
 }
 
+TEST_CASE("d32 apexes sit outside their parent pentagon planes") {
+    auto mesh = Polyhedra::generate(32);
+    REQUIRE(mesh.vertices.size() == 32);
+    REQUIRE(mesh.faces.size() == 60);
+
+    for (int apex = 20; apex < 32; ++apex) {
+        std::vector<const Face*> parentFaces;
+        for (const auto& face : mesh.faces) {
+            if (face.indices[0] == apex || face.indices[1] == apex || face.indices[2] == apex)
+                parentFaces.push_back(&face);
+        }
+
+        REQUIRE(parentFaces.size() == 5);
+
+        int a = -1;
+        int b = -1;
+        int c = -1;
+        for (const auto* face : parentFaces) {
+            for (int idx : face->indices) {
+                if (idx == apex) continue;
+                if (a == -1) { a = idx; continue; }
+                if (b == -1 && idx != a) { b = idx; continue; }
+                if (c == -1 && idx != a && idx != b) { c = idx; }
+            }
+            if (c != -1) break;
+        }
+
+        REQUIRE(a != -1);
+        REQUIRE(b != -1);
+        REQUIRE(c != -1);
+
+        glm::vec3 centroid(0.0f);
+        std::set<int> baseVertices;
+        for (const auto* face : parentFaces) {
+            for (int idx : face->indices) {
+                if (idx != apex) baseVertices.insert(idx);
+            }
+        }
+        REQUIRE(baseVertices.size() == 5);
+        for (int idx : baseVertices) centroid += mesh.vertices[idx];
+        centroid /= (float)baseVertices.size();
+
+        glm::vec3 normal = glm::normalize(glm::cross(
+            mesh.vertices[b] - mesh.vertices[a],
+            mesh.vertices[c] - mesh.vertices[a]
+        ));
+        if (glm::dot(normal, centroid) < 0.0f) normal = -normal;
+
+        float outwardOffset = glm::dot(mesh.vertices[apex] - centroid, normal);
+        REQUIRE(outwardOffset > 0.1f);
+    }
+}
+
 TEST_CASE("all face normals point outward from origin") {
     for (int sides : {4, 6, 8, 10, 12, 16, 20, 32}) {
         CAPTURE(sides);

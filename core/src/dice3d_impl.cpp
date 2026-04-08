@@ -75,6 +75,10 @@ void dice3d_set_idle_spin_speed(Dice3DSceneRef scene, uint32_t handle, float spe
     toScene(scene)->setIdleSpinSpeed(handle, speed);
 }
 
+void dice3d_set_selection_flash_enabled(Dice3DSceneRef scene, uint32_t handle, int enabled) {
+    toScene(scene)->setSelectionFlashEnabled(handle, enabled != 0);
+}
+
 void dice3d_begin_drag(Dice3DSceneRef scene, uint32_t handle) {
     toScene(scene)->beginDrag(handle);
 }

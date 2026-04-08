@@ -368,13 +368,19 @@ PolyMesh Polyhedra::d32() {
         { 6, 15,  7, 19, 18},
     };
 
-    // Apex vertex for each pentagon: centroid pushed outward
-    const float apexScale = 1.15f;
+    // Apex vertex for each pentagon: move outward from the base face plane.
+    // The previous fixed-radius placement put the apexes inside the dodecahedron
+    // because the face centers already sit farther from the origin than 1.15.
+    const float dodecaEdgeLength = glm::length(
+        m.vertices[dodecaFaces[0][0]] - m.vertices[dodecaFaces[0][1]]
+    );
+    const float apexHeight = dodecaEdgeLength * 0.35f;
     for (auto& fi : dodecaFaces) {
-        glm::vec3 centroid(0.0f);
-        for (int i : fi) centroid += m.vertices[i];
-        centroid /= (float)fi.size();
-        m.vertices.push_back(glm::normalize(centroid) * apexScale);
+        Face baseFace{fi, {}, {}, 0};
+        glm::vec3 centroid = faceCentroid(m, baseFace);
+        glm::vec3 normal = faceNormal(m, baseFace);
+        if (glm::dot(normal, centroid) < 0.0f) normal = -normal;
+        m.vertices.push_back(centroid + normal * apexHeight);
     }
 
     // 5 triangles per pentagon: (apex, edge_a, edge_b)

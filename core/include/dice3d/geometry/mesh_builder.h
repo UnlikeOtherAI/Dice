@@ -4,6 +4,15 @@
 
 namespace dice3d {
 
+struct HighlightFaceMesh {
+    int faceNumber = 0;
+    std::vector<glm::vec3> positions;
+    std::vector<glm::vec3> normals;
+    std::vector<glm::vec4> tangents;
+    std::vector<glm::vec2> uvs;
+    std::vector<uint32_t> indices;
+};
+
 struct GpuMesh {
     std::vector<glm::vec3> positions;
     std::vector<glm::vec3> normals;
@@ -13,6 +22,7 @@ struct GpuMesh {
     // faceNumber -> UV cell rect (u0, v0, u1, v1) in atlas
     // faceNumber 0 = bevel/cap face, no label cell
     std::vector<std::pair<int, glm::vec4>> faceAtlasCells;
+    std::vector<HighlightFaceMesh> highlightFaces;
 };
 
 class MeshBuilder {

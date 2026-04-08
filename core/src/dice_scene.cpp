@@ -5,6 +5,17 @@ using namespace dice3d;
 // Camera looks down -Z, up is +Y
 static const glm::vec3 kCameraForward(0, 0, -1);
 static const glm::vec3 kCameraUp(0, 1, 0);
+static constexpr float kSelectionFlashDuration = 0.9f;
+static constexpr float kSelectionFlashPulses = 3.0f;
+
+static float selectionFlashIntensity(float elapsed) {
+    float t = elapsed / kSelectionFlashDuration;
+    if (t <= 0.0f || t >= 1.0f) return 0.0f;
+
+    float wave = std::sin(t * kSelectionFlashPulses * 3.14159265358979323846f);
+    float envelope = 1.0f - 0.20f * t;
+    return wave * wave * envelope;
+}
 
 DiceScene::DiceScene(int backend)
 #ifdef DICE3D_HAVE_FILAMENT
@@ -59,7 +70,8 @@ uint32_t DiceScene::addDie(const DieConfig& config) {
         config.idleSpinSpeed,
         config.presentationSpinSpeed,
         config.presentationDuration,
-        config.dragSensitivity
+        config.dragSensitivity,
+        config.selectionFlashEnabled
     };
     switch (config.presentationMode) {
     case PresentationMode::SpinIn:
@@ -89,6 +101,10 @@ void DiceScene::roll(uint32_t handle, int result, float duration) {
     if (it == _dice.end()) return;
     auto& die = it->second;
     glm::quat target = die.faceMap->orientationForFace(result);
+    die.pendingFlashFace = result;
+    die.flashingFace = 0;
+    die.flashElapsed = 0.0f;
+    _renderer->setDieFaceHighlight(die.renderHandle, 0, 0.0f);
     die.anim->roll(target, duration);
 }
 
@@ -122,6 +138,19 @@ void DiceScene::setIdleSpinSpeed(uint32_t handle, float speed) {
     }
 }
 
+void DiceScene::setSelectionFlashEnabled(uint32_t handle, bool enabled) {
+    auto it = _dice.find(handle);
+    if (it == _dice.end()) return;
+    auto& die = it->second;
+    die.selectionFlashEnabled = enabled;
+    if (!enabled) {
+        die.pendingFlashFace = 0;
+        die.flashingFace = 0;
+        die.flashElapsed = 0.0f;
+        _renderer->setDieFaceHighlight(die.renderHandle, 0, 0.0f);
+    }
+}
+
 void DiceScene::beginDrag(uint32_t handle) {
     auto it = _dice.find(handle);
     if (it == _dice.end()) return;
@@ -146,9 +175,31 @@ void DiceScene::endDrag(uint32_t handle) {
 
 void DiceScene::tick(float dt) {
     for (auto& [handle, die] : _dice) {
+        auto previousState = die.anim->state();
         die.anim->tick(dt);
+        auto currentState = die.anim->state();
         glm::quat orient = die.anim->currentOrientation();
         _renderer->setDieTransform(die.renderHandle, orient, die.position);
+
+        if (previousState == AnimationController::State::Spinning &&
+            currentState == AnimationController::State::Settled &&
+            die.selectionFlashEnabled &&
+            die.pendingFlashFace > 0) {
+            die.flashingFace = die.pendingFlashFace;
+            die.flashElapsed = 0.0f;
+        }
+
+        float flashIntensity = 0.0f;
+        if (die.flashingFace > 0) {
+            die.flashElapsed += dt;
+            flashIntensity = selectionFlashIntensity(die.flashElapsed);
+            if (die.flashElapsed >= kSelectionFlashDuration) {
+                die.flashingFace = 0;
+                die.flashElapsed = 0.0f;
+                flashIntensity = 0.0f;
+            }
+        }
+        _renderer->setDieFaceHighlight(die.renderHandle, die.flashingFace, flashIntensity);
     }
 }
 
