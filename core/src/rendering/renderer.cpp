@@ -45,15 +45,17 @@ Renderer::~Renderer() {
     // Destroy material
     if (_material) _engine->destroy(_material);
 
-    // Destroy view/scene/renderer
+    // Destroy camera / view / scene
     _engine->destroyCameraComponent(_cameraEntity);
     utils::EntityManager::get().destroy(_cameraEntity);
     _engine->destroy(_view);
     _engine->destroy(_scene);
-    _engine->destroy(_renderer);
 
-    // Swap chain must be destroyed before engine
+    // SwapChain must be destroyed before the Filament renderer object
     if (_swapChain) _engine->destroy(_swapChain);
+
+    // Destroy Filament renderer object last (before engine)
+    _engine->destroy(_renderer);
 
     filament::Engine::destroy(&_engine);
 }
@@ -64,7 +66,6 @@ void Renderer::attachSurface(void* nativeWindow, uint32_t w, uint32_t h) {
         nativeWindow,
         filament::SwapChain::CONFIG_TRANSPARENT
     );
-    _view->setBlendMode(filament::View::BlendMode::TRANSLUCENT);
     resize(w, h);
 }
 
@@ -146,10 +147,14 @@ uint32_t Renderer::addDie(const GpuMesh& mesh, const glm::vec4& dieColor, bool /
         half4tangents.push_back(toHalf(t.z));
         half4tangents.push_back(toHalf(t.w));
     }
-    die.vb->setBufferAt(*_engine, 1,
-        filament::VertexBuffer::BufferDescriptor(
-            half4tangents.data(),
-            half4tangents.size() * sizeof(uint16_t)));
+    auto* ownedTangents = new std::vector<uint16_t>(std::move(half4tangents));
+    die.vb->setBufferAt(*_engine, 1, filament::VertexBuffer::BufferDescriptor(
+        ownedTangents->data(),
+        ownedTangents->size() * sizeof(uint16_t),
+        [](void* /*buf*/, size_t, void* user) {
+            delete static_cast<std::vector<uint16_t>*>(user);
+        },
+        ownedTangents));
 
     // Upload UVs
     die.vb->setBufferAt(*_engine, 2,
@@ -158,12 +163,17 @@ uint32_t Renderer::addDie(const GpuMesh& mesh, const glm::vec4& dieColor, bool /
             mesh.uvs.size() * sizeof(glm::vec2)));
 
     // Upload per-vertex color (die color for all verts)
-    std::vector<glm::vec3> colors(mesh.positions.size(),
-                                  glm::vec3(dieColor.r, dieColor.g, dieColor.b));
-    die.vb->setBufferAt(*_engine, 3,
-        filament::VertexBuffer::BufferDescriptor(
-            colors.data(),
-            colors.size() * sizeof(glm::vec3)));
+    // NOTE: mesh.positions, mesh.uvs, mesh.indices are caller-owned (const-ref) — the GpuMesh
+    // must outlive the GPU upload (caller contract). These buffers are NOT heap-copied here.
+    auto* ownedColors = new std::vector<glm::vec3>(
+        mesh.positions.size(), glm::vec3(dieColor.r, dieColor.g, dieColor.b));
+    die.vb->setBufferAt(*_engine, 3, filament::VertexBuffer::BufferDescriptor(
+        ownedColors->data(),
+        ownedColors->size() * sizeof(glm::vec3),
+        [](void* /*buf*/, size_t, void* user) {
+            delete static_cast<std::vector<glm::vec3>*>(user);
+        },
+        ownedColors));
 
     // --- Index buffer ---
     die.ib = filament::IndexBuffer::Builder()
@@ -177,6 +187,9 @@ uint32_t Renderer::addDie(const GpuMesh& mesh, const glm::vec4& dieColor, bool /
 
     // --- Entity + renderable ---
     die.entity = utils::EntityManager::get().create();
+
+    // TODO(Task 13): bind material instance once .filamat is available.
+    // Without a material, Filament uses its default material (unlit gray).
     filament::RenderableManager::Builder(1)
         .boundingBox({{-2,-2,-2},{2,2,2}})
         .geometry(0, filament::RenderableManager::PrimitiveType::TRIANGLES,
@@ -185,6 +198,10 @@ uint32_t Renderer::addDie(const GpuMesh& mesh, const glm::vec4& dieColor, bool /
         .receiveShadows(false)
         .castShadows(false)
         .build(*_engine, die.entity);
+
+    // Register with TransformManager so setDieTransform can obtain a valid instance.
+    auto& tcm = _engine->getTransformManager();
+    tcm.create(die.entity);
 
     _scene->addEntity(die.entity);
     _dice[handle] = std::move(die);

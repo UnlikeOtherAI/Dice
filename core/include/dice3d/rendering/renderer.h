@@ -1,6 +1,8 @@
 #pragma once
 #include <cstdint>
 #include "dice3d/geometry/mesh_builder.h"
+#include <glm/glm.hpp>
+#include <glm/gtc/quaternion.hpp>
 
 #ifdef DICE3D_HAVE_FILAMENT
 #include <filament/Engine.h>
@@ -19,8 +21,6 @@
 #include <filament/MaterialInstance.h>
 #include <filament/LightManager.h>
 #include <unordered_map>
-#include <glm/glm.hpp>
-#include <glm/gtc/quaternion.hpp>
 #endif
 
 namespace dice3d {
