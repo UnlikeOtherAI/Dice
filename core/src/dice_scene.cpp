@@ -6,8 +6,13 @@ using namespace dice3d;
 static const glm::vec3 kCameraForward(0, 0, -1);
 static const glm::vec3 kCameraUp(0, 1, 0);
 
-DiceScene::DiceScene()
-    : _renderer(std::make_unique<Renderer>()) {}
+DiceScene::DiceScene(int backend)
+#ifdef DICE3D_HAVE_FILAMENT
+    : _renderer(std::make_unique<Renderer>(static_cast<filament::Engine::Backend>(backend)))
+#else
+    : _renderer(std::make_unique<Renderer>(backend))
+#endif
+{}
 
 void DiceScene::attachSurface(void* nativeWindow, uint32_t w, uint32_t h) {
     _renderer->attachSurface(nativeWindow, w, h);
@@ -70,6 +75,12 @@ void DiceScene::tick(float dt) {
 
 void DiceScene::renderFrame() {
     _renderer->renderFrame();
+}
+
+void DiceScene::rollAll(const std::vector<std::pair<uint32_t, int>>& rolls, float duration) {
+    for (auto& [handle, result] : rolls) {
+        roll(handle, result, duration);
+    }
 }
 
 void DiceScene::layoutDice() {

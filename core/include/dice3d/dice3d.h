@@ -16,6 +16,8 @@ void dice3d_attach_surface(Dice3DSceneRef scene, void* nativeWindow,
 void dice3d_detach_surface(Dice3DSceneRef scene);
 void dice3d_resize(Dice3DSceneRef scene, uint32_t width, uint32_t height);
 
+// NOTE: Synchronous — builds mesh on calling thread. Do not call on the main/render thread
+// for large die types (d32). Returns 0 on failure.
 uint32_t dice3d_add_die(Dice3DSceneRef scene, int sides,
                         float bevel,
                         float r, float g, float b, float a,
