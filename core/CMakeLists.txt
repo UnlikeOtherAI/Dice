@@ -22,10 +22,22 @@ target_include_directories(dice3d PRIVATE ${FILAMENT_DIR}/include)
 # --- Tests ---
 if(BUILD_TESTING)
     include(FetchContent)
+
+    # glm: used by the library headers (Filament ships its own in real builds;
+    # we fetch it here for the stub/test build where FILAMENT_DIR has no headers)
+    FetchContent_Declare(
+        glm
+        GIT_REPOSITORY https://github.com/g-truc/glm.git
+        GIT_TAG        1.0.1
+    )
+    FetchContent_MakeAvailable(glm)
+    # Expose glm to both the library and the test executable
+    target_include_directories(dice3d PRIVATE ${glm_SOURCE_DIR})
+
     FetchContent_Declare(
         Catch2
         GIT_REPOSITORY https://github.com/catchorg/Catch2.git
-        GIT_TAG v3.5.2
+        GIT_TAG        v3.5.2
     )
     FetchContent_MakeAvailable(Catch2)
 
@@ -35,6 +47,7 @@ if(BUILD_TESTING)
         tests/test_animation.cpp
         tests/test_face_mapper.cpp
     )
+    target_include_directories(dice3d_tests PRIVATE ${glm_SOURCE_DIR})
     target_link_libraries(dice3d_tests PRIVATE dice3d Catch2::Catch2WithMain)
     include(Catch)
     catch_discover_tests(dice3d_tests)
