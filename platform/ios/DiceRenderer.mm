@@ -8,8 +8,17 @@
     self = [super init];
     if (self) {
         _scene = dice3d_create();
+        [self _loadBundledMaterial];
     }
     return self;
+}
+
+- (void)_loadBundledMaterial {
+    NSURL *url = [[NSBundle mainBundle] URLForResource:@"dice" withExtension:@"filamat"];
+    if (!url) return;
+    NSData *data = [NSData dataWithContentsOfURL:url];
+    if (!data) return;
+    dice3d_load_material(_scene, data.bytes, (size_t)data.length);
 }
 
 - (void)dealloc {

@@ -2,18 +2,15 @@ material {
     name : "dice",
     shadingModel : lit,
     parameters : [
-        { type : sampler2d, name : numberAtlas },
-        { type : float4,    name : dieColor },
-        { type : float4,    name : numberColor }
+        { type : float4, name : dieColor },
+        { type : float4, name : numberColor }
     ]
 }
 fragment {
     void material(inout MaterialInputs material) {
         prepareMaterial(material);
-        float2 uv = getUV0();
-        float alpha = texture(materialParams_numberAtlas, uv).r;
-        material.baseColor = mix(materialParams.dieColor,
-                                 materialParams.numberColor,
-                                 alpha);
+        material.baseColor = materialParams.dieColor;
+        material.roughness = 0.3;
+        material.metallic  = 0.1;
     }
 }

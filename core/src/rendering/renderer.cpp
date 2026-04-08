@@ -108,10 +108,11 @@ void Renderer::resize(uint32_t w, uint32_t h) {
 
 void Renderer::setupCamera(uint32_t w, uint32_t h) {
     float aspect = (h > 0) ? (float)w / (float)h : 1.0f;
-    // Perspective camera: 45 deg FOV, near=0.1, far=100
-    _camera->setProjection(45.0, aspect, 0.1, 100.0);
-    // Position camera 5 units back looking at origin
-    _camera->lookAt({0,0,5}, {0,0,0}, {0,1,0});
+    // Vertical FOV 45°. On portrait phones (aspect ~0.46) the visible half-width
+    // = aspect * distance * tan(22.5°). Die fits in ±2 units, so we need
+    // distance ≥ 2 / (aspect * tan(22.5°)) ≈ 10.5 for portrait — use 12 for margin.
+    _camera->setProjection(45.0, aspect, 0.1, 200.0);
+    _camera->lookAt({0,0,12}, {0,0,0}, {0,1,0});
 }
 
 void Renderer::setupLighting() {
@@ -143,8 +144,9 @@ uint32_t Renderer::addDie(const GpuMesh& mesh, const glm::vec4& dieColor, bool w
         .attribute(filament::VertexAttribute::UV0, 2,
                    filament::VertexBuffer::AttributeType::FLOAT2)
         .attribute(filament::VertexAttribute::COLOR, 3,
-                   filament::VertexBuffer::AttributeType::FLOAT3)
-        .normalized(filament::VertexAttribute::TANGENTS);
+                   filament::VertexBuffer::AttributeType::FLOAT3);
+    // HALF4 is already floating-point; .normalized() is only valid for integer types (SHORT4 etc.)
+    // Applying it to HALF4 causes a postcondition panic in Filament's Metal backend.
 
     die.vb = vbBuilder.build(*_engine);
 
@@ -213,8 +215,8 @@ uint32_t Renderer::addDie(const GpuMesh& mesh, const glm::vec4& dieColor, bool w
     // --- Entity + renderable ---
     die.entity = utils::EntityManager::get().create();
 
-    // Bind material instance if both material and atlas texture have been loaded.
-    if (_material && _atlasTexture) {
+    // Bind material instance if a material has been loaded.
+    if (_material) {
         die.matInst = _material->createInstance();
         die.matInst->setParameter("dieColor",
             filament::math::float4{dieColor.r, dieColor.g, dieColor.b, dieColor.a});
@@ -222,9 +224,11 @@ uint32_t Renderer::addDie(const GpuMesh& mesh, const glm::vec4& dieColor, bool w
             whiteNumbers
                 ? filament::math::float4{1,1,1,1}
                 : filament::math::float4{0,0,0,1});
-        filament::TextureSampler sampler(filament::TextureSampler::MinFilter::LINEAR,
-                                        filament::TextureSampler::MagFilter::LINEAR);
-        die.matInst->setParameter("numberAtlas", _atlasTexture, sampler);
+        if (_atlasTexture) {
+            filament::TextureSampler sampler(filament::TextureSampler::MinFilter::LINEAR,
+                                            filament::TextureSampler::MagFilter::LINEAR);
+            die.matInst->setParameter("numberAtlas", _atlasTexture, sampler);
+        }
     }
 
     filament::RenderableManager::Builder rb(1);

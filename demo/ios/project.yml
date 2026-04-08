@@ -16,6 +16,9 @@ targets:
         group: Platform/iOS
         excludes:
           - "*.md"
+      - path: ../../core/assets/dice.filamat
+        group: Resources
+        buildPhase: resources
     settings:
       base:
         PRODUCT_BUNDLE_IDENTIFIER: com.kilomayo.dicedemo
