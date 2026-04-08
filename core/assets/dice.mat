@@ -1,0 +1,16 @@
+material {
+    name : "dice",
+    shadingModel : lit,
+    parameters : [
+        { type : float4, name : dieColor },
+        { type : float4, name : numberColor }
+    ]
+}
+fragment {
+    void material(inout MaterialInputs material) {
+        prepareMaterial(material);
+        material.baseColor = materialParams.dieColor;
+        material.roughness = 0.3;
+        material.metallic  = 0.1;
+    }
+}

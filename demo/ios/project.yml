@@ -1,0 +1,64 @@
+name: DiceDemo
+options:
+  deploymentTarget:
+    iOS: "16.0"
+  bundleIdPrefix: com.kilomayo
+  xcodeVersion: "15"
+  createIntermediateGroups: true
+
+targets:
+  DiceDemo:
+    type: application
+    platform: iOS
+    sources:
+      - path: DiceDemo
+      - path: ../../platform/ios
+        group: Platform/iOS
+        excludes:
+          - "*.md"
+      - path: ../../core/assets/dice.filamat
+        group: Resources
+        buildPhase: resources
+    settings:
+      base:
+        PRODUCT_BUNDLE_IDENTIFIER: com.kilomayo.dicedemo
+        SWIFT_OBJC_BRIDGING_HEADER: DiceDemo/DiceDemo-Bridging-Header.h
+        HEADER_SEARCH_PATHS:
+          - "$(PROJECT_DIR)/../../core/include"
+          - "$(PROJECT_DIR)/../../platform/ios"
+          - "/tmp/filament-ios/filament/include"
+        LIBRARY_SEARCH_PATHS:
+          - "$(PROJECT_DIR)/../../build-ios-device/core"
+          - "/tmp/filament-ios/filament/lib/universal"
+        OTHER_LDFLAGS:
+          - "-ldice3d"
+          - "-lfilament"
+          - "-lbackend"
+          - "-lfilabridge"
+          - "-lfilaflat"
+          - "-lshaders"
+          - "-lutils"
+          - "-lsmol-v"
+          - "-labseil"
+          - "-lzstd"
+          - "-luberzlib"
+          - "-lc++"
+        FRAMEWORK_SEARCH_PATHS: []
+        ENABLE_BITCODE: NO
+        CLANG_ENABLE_MODULES: YES
+        GCC_ENABLE_OBJC_EXCEPTIONS: YES
+        GENERATE_INFOPLIST_FILE: YES
+        INFOPLIST_KEY_UIApplicationSceneManifest_Generation: YES
+        INFOPLIST_KEY_UILaunchScreen_Generation: YES
+        INFOPLIST_KEY_UISupportedInterfaceOrientations_iPhone: "UIInterfaceOrientationPortrait"
+        CODE_SIGN_STYLE: Automatic
+        DEVELOPMENT_TEAM: 59S95D279D
+      configs:
+        Debug:
+          LIBRARY_SEARCH_PATHS[sdk=iphonesimulator*]:
+            - "$(PROJECT_DIR)/../../build-ios-sim-arm64/core"
+            - "/tmp/filament-ios-sim"
+        Release:
+          LIBRARY_SEARCH_PATHS[sdk=iphonesimulator*]:
+            - "$(PROJECT_DIR)/../../build-ios-sim-arm64/core"
+            - "/tmp/filament-ios-sim"
