@@ -2,6 +2,7 @@
 #include <catch2/matchers/catch_matchers_floating_point.hpp>
 #include "dice3d/geometry/polyhedra.h"
 #include <cmath>
+#include <set>
 using namespace dice3d;
 
 TEST_CASE("d6 has 8 vertices and 6 faces") {
@@ -43,8 +44,8 @@ TEST_CASE("d10 edge lengths are approximately 0.618 and 1.618") {
     // One should be ~0.618, other ~1.618
     float shorter = std::min(e1, e2);
     float longer  = std::max(e1, e2);
-    REQUIRE_THAT(shorter, Catch::Matchers::WithinAbs(0.618f, 0.02f));
-    REQUIRE_THAT(longer,  Catch::Matchers::WithinAbs(1.618f, 0.02f));
+    REQUIRE_THAT(shorter, Catch::Matchers::WithinAbs(0.618f, 0.01f));
+    REQUIRE_THAT(longer,  Catch::Matchers::WithinAbs(1.618f, 0.01f));
 }
 
 TEST_CASE("d12 has 20 vertices and 12 faces") {
@@ -69,6 +70,15 @@ TEST_CASE("d32 pentakis dodecahedron has 32 vertices and 60 faces") {
     auto mesh = Polyhedra::generate(32);
     REQUIRE(mesh.vertices.size() == 32);
     REQUIRE(mesh.faces.size() == 60);
+}
+
+TEST_CASE("d32 covers at least 32 distinct face numbers") {
+    auto mesh = Polyhedra::generate(32);
+    std::set<int> nums;
+    for (auto& f : mesh.faces) if (f.faceNumber > 0) nums.insert(f.faceNumber);
+    REQUIRE(nums.size() >= 32);
+    REQUIRE(*nums.begin() == 1);
+    REQUIRE(*nums.rbegin() == 32);
 }
 
 TEST_CASE("all face normals point outward from origin") {

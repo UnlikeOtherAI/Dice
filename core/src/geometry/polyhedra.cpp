@@ -5,6 +5,7 @@
 
 using namespace dice3d;
 
+static constexpr float kPi = 3.14159265358979323846f;
 static const float PHI = (1.0f + std::sqrt(5.0f)) / 2.0f;  // golden ratio ≈ 1.618
 
 // ---------------------------------------------------------------------------
@@ -245,7 +246,7 @@ PolyMesh Polyhedra::d16() {
     const float H = 1.2f;   // apex height
 
     for (int k = 0; k < N; k++) {
-        float angle = 2.0f * (float)M_PI * (float)k / (float)N;
+        float angle = 2.0f * kPi * (float)k / (float)N;
         m.vertices.push_back({R * std::cos(angle), R * std::sin(angle), 0.0f});
     }
     m.vertices.push_back({0.0f, 0.0f,  H});  // index 8: top apex
@@ -384,8 +385,8 @@ PolyMesh Polyhedra::d32() {
         for (int i = 0; i < 5; i++) {
             int a = fi[i], b = fi[(i + 1) % 5];
             m.faces.push_back({{apex, a, b}, {}, {}, faceNum});
+            if (++faceNum > 32) faceNum = 1;
         }
-        if (++faceNum > 32) faceNum = 1;
     }
 
     enforceOutwardNormals(m);
@@ -413,6 +414,7 @@ glm::vec3 Polyhedra::faceCentroid(const PolyMesh& mesh, const Face& face) {
 }
 
 void Polyhedra::enforceOutwardNormals(PolyMesh& mesh) {
+    // Precondition: mesh is origin-centered (centroid test assumes origin-relative faces)
     for (auto& f : mesh.faces) {
         f.normal          = faceNormal(mesh, f);
         glm::vec3 centroid = faceCentroid(mesh, f);
