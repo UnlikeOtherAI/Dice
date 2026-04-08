@@ -36,7 +36,6 @@ if(BUILD_TESTING)
         tests/test_face_mapper.cpp
     )
     target_link_libraries(dice3d_tests PRIVATE dice3d Catch2::Catch2WithMain)
-    include(CTest)
     include(Catch)
     catch_discover_tests(dice3d_tests)
 endif()
