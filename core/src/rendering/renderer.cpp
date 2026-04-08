@@ -4,6 +4,7 @@
 #include "dice3d/rendering/renderer.h"
 #include <filament/Camera.h>
 #include <filament/Color.h>
+#include <filament/Viewport.h>
 #include <filament/RenderableManager.h>
 #include <filament/TransformManager.h>
 #include <math/mat4.h>
@@ -226,13 +227,13 @@ uint32_t Renderer::addDie(const GpuMesh& mesh, const glm::vec4& dieColor, bool w
         die.matInst->setParameter("numberAtlas", _atlasTexture, sampler);
     }
 
-    auto rb = filament::RenderableManager::Builder(1)
-        .boundingBox({{-2,-2,-2},{2,2,2}})
-        .geometry(0, filament::RenderableManager::PrimitiveType::TRIANGLES,
-                  die.vb, die.ib)
-        .culling(false)
-        .receiveShadows(false)
-        .castShadows(false);
+    filament::RenderableManager::Builder rb(1);
+    rb.boundingBox({{-2,-2,-2},{2,2,2}})
+      .geometry(0, filament::RenderableManager::PrimitiveType::TRIANGLES,
+                die.vb, die.ib)
+      .culling(false)
+      .receiveShadows(false)
+      .castShadows(false);
     if (die.matInst) rb.material(0, die.matInst);
     rb.build(*_engine, die.entity);
 

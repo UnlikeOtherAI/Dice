@@ -1,8 +1,8 @@
 name: DiceDemo
 options:
   deploymentTarget:
-    iOS: "14.0"
-  bundleIdPrefix: com.dice3d
+    iOS: "15.0"
+  bundleIdPrefix: com.kilomayo
   xcodeVersion: "15"
   createIntermediateGroups: true
 
@@ -18,23 +18,35 @@ targets:
           - "*.md"
     settings:
       base:
+        PRODUCT_BUNDLE_IDENTIFIER: com.kilomayo.dicedemo
         SWIFT_OBJC_BRIDGING_HEADER: DiceDemo/DiceDemo-Bridging-Header.h
         HEADER_SEARCH_PATHS:
           - "$(PROJECT_DIR)/../../core/include"
           - "$(PROJECT_DIR)/../../platform/ios"
+          - "/tmp/filament-ios/filament/include"
         LIBRARY_SEARCH_PATHS:
-          - "$(PROJECT_DIR)/../../build-ios/device/core/Release"
-          - "$(PROJECT_DIR)/../../build-ios/device/core"
+          - "$(PROJECT_DIR)/../../build-ios-device/core"
+          - "/tmp/filament-ios/filament/lib/universal"
         OTHER_LDFLAGS:
           - "-ldice3d"
+          - "-lfilament"
+          - "-lbackend"
+          - "-lfilabridge"
+          - "-lfilaflat"
+          - "-lshaders"
+          - "-lutils"
+          - "-lsmol-v"
+          - "-labseil"
+          - "-lzstd"
+          - "-luberzlib"
           - "-lc++"
+        FRAMEWORK_SEARCH_PATHS: []
         ENABLE_BITCODE: NO
         CLANG_ENABLE_MODULES: YES
         GCC_ENABLE_OBJC_EXCEPTIONS: YES
-      configs:
-        Debug:
-          LIBRARY_SEARCH_PATHS:
-            - "$(PROJECT_DIR)/../../build-ios/device/core"
-        Release:
-          LIBRARY_SEARCH_PATHS:
-            - "$(PROJECT_DIR)/../../build-ios/device/core/Release"
+        GENERATE_INFOPLIST_FILE: YES
+        INFOPLIST_KEY_UIApplicationSceneManifest_Generation: YES
+        INFOPLIST_KEY_UILaunchScreen_Generation: YES
+        INFOPLIST_KEY_UISupportedInterfaceOrientations_iPhone: "UIInterfaceOrientationPortrait"
+        CODE_SIGN_STYLE: Automatic
+        DEVELOPMENT_TEAM: 59S95D279D

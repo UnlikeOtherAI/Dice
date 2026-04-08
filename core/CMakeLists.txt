@@ -27,20 +27,20 @@ else()
     message(STATUS "Filament stub at ${FILAMENT_DIR} — renderer is a compile stub")
 endif()
 
+# --- glm ---
+# Always needed by the library headers. Filament's iOS binary does not ship glm headers,
+# so we fetch it unconditionally via FetchContent.
+include(FetchContent)
+FetchContent_Declare(
+    glm
+    GIT_REPOSITORY https://github.com/g-truc/glm.git
+    GIT_TAG        1.0.1
+)
+FetchContent_MakeAvailable(glm)
+target_include_directories(dice3d PUBLIC ${glm_SOURCE_DIR})
+
 # --- Tests ---
 if(BUILD_TESTING)
-    include(FetchContent)
-
-    # glm: used by the library headers (Filament ships its own in real builds;
-    # we fetch it here for the stub/test build where FILAMENT_DIR has no headers)
-    FetchContent_Declare(
-        glm
-        GIT_REPOSITORY https://github.com/g-truc/glm.git
-        GIT_TAG        1.0.1
-    )
-    FetchContent_MakeAvailable(glm)
-    # Expose glm to both the library and the test executable
-    target_include_directories(dice3d PRIVATE ${glm_SOURCE_DIR})
 
     FetchContent_Declare(
         Catch2
