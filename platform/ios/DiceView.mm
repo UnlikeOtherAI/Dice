@@ -18,7 +18,7 @@
 
     CAMetalLayer* layer = (CAMetalLayer*)self.layer;
     layer.pixelFormat       = MTLPixelFormatBGRA8Unorm;
-    layer.framebufferOnly   = NO;   // required for transparent compositing
+    layer.framebufferOnly   = YES;  // default; transparency via opaque=NO + Filament CONFIG_TRANSPARENT
     layer.opaque            = NO;
 
     CGSize s = self.bounds.size;
