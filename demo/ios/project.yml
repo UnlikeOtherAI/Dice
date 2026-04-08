@@ -1,0 +1,40 @@
+name: DiceDemo
+options:
+  deploymentTarget:
+    iOS: "14.0"
+  bundleIdPrefix: com.dice3d
+  xcodeVersion: "15"
+  createIntermediateGroups: true
+
+targets:
+  DiceDemo:
+    type: application
+    platform: iOS
+    sources:
+      - path: DiceDemo
+      - path: ../../platform/ios
+        group: Platform/iOS
+        excludes:
+          - "*.md"
+    settings:
+      base:
+        SWIFT_OBJC_BRIDGING_HEADER: DiceDemo/DiceDemo-Bridging-Header.h
+        HEADER_SEARCH_PATHS:
+          - "$(PROJECT_DIR)/../../core/include"
+          - "$(PROJECT_DIR)/../../platform/ios"
+        LIBRARY_SEARCH_PATHS:
+          - "$(PROJECT_DIR)/../../build-ios/device/core/Release"
+          - "$(PROJECT_DIR)/../../build-ios/device/core"
+        OTHER_LDFLAGS:
+          - "-ldice3d"
+          - "-lc++"
+        ENABLE_BITCODE: NO
+        CLANG_ENABLE_MODULES: YES
+        GCC_ENABLE_OBJC_EXCEPTIONS: YES
+      configs:
+        Debug:
+          LIBRARY_SEARCH_PATHS:
+            - "$(PROJECT_DIR)/../../build-ios/device/core"
+        Release:
+          LIBRARY_SEARCH_PATHS:
+            - "$(PROJECT_DIR)/../../build-ios/device/core/Release"
