@@ -1,6 +1,8 @@
 #include <catch2/catch_test_macros.hpp>
 #include <catch2/matchers/catch_matchers_floating_point.hpp>
 #include "dice3d/geometry/polyhedra.h"
+#include "dice3d/geometry/chamfer.h"
+#include "dice3d/geometry/mesh_builder.h"
 #include <cmath>
 #include <set>
 using namespace dice3d;
@@ -91,5 +93,25 @@ TEST_CASE("all face normals point outward from origin") {
             centroid /= (float)face.indices.size();
             REQUIRE(glm::dot(face.normal, centroid) > 0.0f);
         }
+    }
+}
+
+TEST_CASE("mesh builder produces non-empty vertex and index buffers") {
+    auto base = Polyhedra::generate(6);
+    auto chamfered = Chamfer::apply(base, 0.05f);
+    auto mesh = MeshBuilder::build(chamfered, /*atlasSize=*/512);
+    REQUIRE(!mesh.positions.empty());
+    REQUIRE(!mesh.indices.empty());
+    REQUIRE(mesh.uvs.size() == mesh.positions.size());
+    REQUIRE(mesh.normals.size() == mesh.positions.size());
+    REQUIRE(mesh.indices.size() % 3 == 0);
+}
+
+TEST_CASE("all UV coordinates are in [0, 1] range") {
+    auto base = Polyhedra::generate(20);
+    auto mesh = MeshBuilder::build(Chamfer::apply(base, 0.05f), 512);
+    for (auto& uv : mesh.uvs) {
+        REQUIRE(uv.x >= 0.0f); REQUIRE(uv.x <= 1.0f);
+        REQUIRE(uv.y >= 0.0f); REQUIRE(uv.y <= 1.0f);
     }
 }
