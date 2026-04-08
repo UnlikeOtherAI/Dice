@@ -6,6 +6,7 @@ using namespace dice3d;
 
 PolyMesh Chamfer::apply(const PolyMesh& input, float bevel_factor) {
     if (bevel_factor <= 0.0f) return input;
+    bevel_factor = std::min(bevel_factor, 0.5f);  // clamp: > 0.5 inverts faces
 
     PolyMesh result;
 
@@ -59,9 +60,10 @@ PolyMesh Chamfer::apply(const PolyMesh& input, float bevel_factor) {
         int v1a = insetFaceVerts[r1.faceIdx][r1.localA];
         int v1b = insetFaceVerts[r1.faceIdx][r1.localB];
         // Bevel quad connects the two adjacent inset faces across their shared edge.
-        // Winding: v0a, v0b from face 0 (outward); v1a, v1b from face 1 (reversed).
+        // Face 0 edge: v0a -> v0b. Face 1 edge (opposite): v1a(=b-side) -> v1b(=a-side).
+        // CCW ring from outside: v1a, v0b, v0a, v1b (alternating z-layers around the strip).
         Face bevel;
-        bevel.indices = {v0a, v0b, v1a, v1b};
+        bevel.indices = {v1a, v0b, v0a, v1b};
         bevel.faceNumber = 0;
         bevel.normal = glm::normalize(
             input.faces[r0.faceIdx].normal + input.faces[r1.faceIdx].normal

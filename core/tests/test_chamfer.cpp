@@ -20,11 +20,22 @@ TEST_CASE("chamfer d6 with factor 0.05 adds edge and corner faces") {
 TEST_CASE("chamfer preserves outward normals") {
     auto base = Polyhedra::generate(20);
     auto result = Chamfer::apply(base, 0.05f);
-    for (auto& f : result.faces) {
+    for (size_t i = 0; i < result.faces.size(); i++) {
+        auto& f = result.faces[i];
+        if (f.indices.size() < 3) continue;
+
+        // Stored normal must point outward from origin
         glm::vec3 c(0);
-        for (int i : f.indices) c += result.vertices[i];
+        for (int idx : f.indices) c += result.vertices[idx];
         c /= (float)f.indices.size();
         REQUIRE(glm::dot(f.normal, c) > 0.0f);
+
+        // Geometric normal from vertex winding must agree with stored normal
+        glm::vec3 a = result.vertices[f.indices[0]];
+        glm::vec3 b = result.vertices[f.indices[1]];
+        glm::vec3 cv = result.vertices[f.indices[2]];
+        glm::vec3 geom_normal = glm::normalize(glm::cross(b - a, cv - a));
+        REQUIRE(glm::dot(geom_normal, f.normal) > 0.0f);
     }
 }
 
