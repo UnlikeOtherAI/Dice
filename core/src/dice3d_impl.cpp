@@ -11,7 +11,15 @@ static dice3d::DiceScene* toScene(Dice3DSceneRef ref) {
 extern "C" {
 
 Dice3DSceneRef dice3d_create(void) {
+#ifdef __ANDROID__
+    // Android emulators expose only software GLES (ANGLE/SwiftShader), on which
+    // Filament's PlatformEGLAndroid::createDriver aborts. The Vulkan backend (2)
+    // works over the emulator's SwiftShader Vulkan and on real-device Vulkan.
+    // (iOS keeps DEFAULT → Metal.)
+    return static_cast<Dice3DSceneRef>(static_cast<void*>(new dice3d::DiceScene(2)));
+#else
     return static_cast<Dice3DSceneRef>(static_cast<void*>(new dice3d::DiceScene()));
+#endif
 }
 
 void dice3d_destroy(Dice3DSceneRef scene) {
