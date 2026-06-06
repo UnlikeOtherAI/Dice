@@ -24,6 +24,12 @@ class DiceRenderer {
     fun roll(handle: Int, result: Int, duration: Float) =
         nativeRoll(nativePtr, handle, result, duration)
 
+    /** Load the compiled PBR material (.filamat bytes). Call before addDie to render numbers. */
+    fun loadMaterial(data: ByteArray) = nativeLoadMaterial(nativePtr, data)
+
+    /** Load the face-number atlas as raw RGBA8 pixels (width*height*4 bytes). Call after loadMaterial, before addDie. */
+    fun loadAtlas(rgba: ByteArray, width: Int, height: Int) = nativeLoadAtlas(nativePtr, rgba, width, height)
+
     fun tick(dt: Float) = nativeTick(nativePtr, dt)
     fun renderFrame() = nativeRenderFrame(nativePtr)
 
@@ -47,6 +53,8 @@ class DiceRenderer {
                                                       r: Float, g: Float, b: Float, a: Float, white: Int): Int
         @JvmStatic private external fun nativeRemoveDie(ptr: Long, handle: Int)
         @JvmStatic private external fun nativeRoll(ptr: Long, handle: Int, result: Int, duration: Float)
+        @JvmStatic private external fun nativeLoadMaterial(ptr: Long, data: ByteArray)
+        @JvmStatic private external fun nativeLoadAtlas(ptr: Long, rgba: ByteArray, w: Int, h: Int)
         @JvmStatic private external fun nativeTick(ptr: Long, dt: Float)
         @JvmStatic private external fun nativeRenderFrame(ptr: Long)
     }

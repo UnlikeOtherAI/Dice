@@ -58,6 +58,25 @@ Java_com_dice3d_DiceRenderer_nativeRoll(
 }
 
 JNIEXPORT void JNICALL
+Java_com_dice3d_DiceRenderer_nativeLoadMaterial(
+    JNIEnv* env, jobject, jlong ptr, jbyteArray data)
+{
+    jsize len = env->GetArrayLength(data);
+    jbyte* buf = env->GetByteArrayElements(data, nullptr);
+    dice3d_load_material((Dice3DSceneRef)(void*)ptr, buf, (size_t)len);
+    env->ReleaseByteArrayElements(data, buf, JNI_ABORT);
+}
+
+JNIEXPORT void JNICALL
+Java_com_dice3d_DiceRenderer_nativeLoadAtlas(
+    JNIEnv* env, jobject, jlong ptr, jbyteArray rgba, jint w, jint h)
+{
+    jbyte* buf = env->GetByteArrayElements(rgba, nullptr);
+    dice3d_load_atlas((Dice3DSceneRef)(void*)ptr, buf, (uint32_t)w, (uint32_t)h);
+    env->ReleaseByteArrayElements(rgba, buf, JNI_ABORT);
+}
+
+JNIEXPORT void JNICALL
 Java_com_dice3d_DiceRenderer_nativeTick(JNIEnv*, jobject, jlong ptr, jfloat dt) {
     dice3d_tick((Dice3DSceneRef)(void*)ptr, dt);
 }
