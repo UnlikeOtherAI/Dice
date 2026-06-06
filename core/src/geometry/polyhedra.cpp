@@ -1,5 +1,6 @@
 #include "dice3d/geometry/polyhedra.h"
 #include <stdexcept>
+#include <string>
 #include <cmath>
 #include <algorithm>
 

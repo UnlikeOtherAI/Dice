@@ -2,3 +2,9 @@
 build*/
 dist/
 wrapper/swift/.build/
+
+# Android port build artifacts / large vendored SDK / local SDK path
+vendor/
+local.properties
+.gradle/
+**/src/main/jniLibs/

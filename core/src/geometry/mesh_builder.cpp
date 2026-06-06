@@ -4,6 +4,8 @@
 #include <glm/gtx/quaternion.hpp>
 #include <map>
 #include <set>
+#include <algorithm>
+#include <string>
 #include <cmath>
 
 using namespace dice3d;
