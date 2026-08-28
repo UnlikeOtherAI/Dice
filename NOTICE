@@ -1,0 +1,20 @@
+Dice
+Copyright 2026 Unlike Other AI
+
+Licensed under the Apache License, Version 2.0 (see LICENSE).
+
+--------------------------------------------------------------------------------
+Third-party notices
+--------------------------------------------------------------------------------
+
+This project builds against Google Filament (https://github.com/google/filament),
+which is licensed under the Apache License, Version 2.0. The Filament SDK itself
+is NOT redistributed here — it is fetched at build time (see scripts/).
+
+The compiled material `core/assets/dice.filamat` is produced by Filament's `matc`
+compiler and therefore embeds Filament shader-library code. That embedded portion
+remains Copyright Google LLC, licensed under the Apache License, Version 2.0.
+
+The Gradle wrapper JARs under demo/android and platform/android are unmodified
+Gradle artifacts, Copyright Gradle Inc., licensed under the Apache License,
+Version 2.0.
